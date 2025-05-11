@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta
+            http-equiv="Content-Security-Policy"
+            content="default-src 'self'; script-src 'self' 'unsafe-inline';"
+        />
+        <meta name="title" content="Minimalify" />
+        <meta
+            name="description"
+            content="Minimalify is a zero-dependency CLI/library for building blazing-fast, static HTML/CSS/JS sites with reusable components."
+        />
+
+        <link rel="canonical" href="https://therahulagarwal.com/minimalify" />
+
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "Person",
+                "name": "Rahul Agarwal",
+                "jobTitle": "Full Stack Developer",
+                "alumniOf": [
+                    {
+                        "@type": "CollegeOrUniversity",
+                        "name": "Heritage Academy"
+                    },
+                    {
+                        "@type": "CollegeOrUniversity",
+                        "name": "BITS Pilani"
+                    }
+                ],
+                "worksFor": {
+                    "@type": "Organization",
+                    "name": "SAP"
+                },
+                "url": "https://therahulagarwal.com",
+                "sameAs": [
+                    "https://github.com/ragarwalll",
+                    "https://www.linkedin.com/in/ragarwalll/",
+                    "https://www.instagram.com/rahulllagarwalll/"
+                ]
+            }
+        </script>
+
+        <meta
+            name="keywords"
+            content="Minimalify, macOS, menu-bar utility, lightweight, user input simulation, battery optimization, app focus simulation"
+        />
+
+        <meta name="c-blockquote__author" content="Rahul Agarwal" />
+        <meta name="robots" content="index, follow" />
+
+        <meta property="og:type" content="website" />
+        <meta
+            property="og:url"
+            content="https://therahulagarwal.com/minimalify"
+        />
+        <meta property="og:title" content="Minimalify" />
+        <meta
+            property="og:description"
+            content="Minimalify is a zero-dependency CLI/library for building blazing-fast, static HTML/CSS/JS sites with reusable components."
+        />
+        <meta
+            property="og:site_name"
+            content="Minimalify - Zero-dependency CLI/library for building blazing-fast, static HTML/CSS/JS sites with reusable components."
+        />
+        <meta property="og:locale" content="en_US" />
+
+        <meta property="profile:first_name" content="Rahul" />
+        <meta property="profile:last_name" content="Agarwal" />
+        <meta property="profile:username" content="ragarwalll" />
+
+        <meta
+            property="og:image"
+            content="https://therahulagarwal.com/minimalify/images/banner.jpg"
+        />
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:image:alt" content="Minimalify Logo" />
+
+        <meta
+            http-equiv="Cache-Control"
+            content="no-cache, no-store, must-revalidate"
+        />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" />
+
+        <meta name="classification" content="Utility" />
+        <meta name="target" content="all" />
+        <meta name="rating" content="General" />
+
+        <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="./favicon/apple-touch-icon.png"
+        />
+        <link rel="manifest" href="./site.webmanifest.json" />
+        <link rel="icon" href="./favicon/favicon.ico" sizes="48x48" />
+        <link
+            rel="icon"
+            href="./favicon/favicon.svg"
+            sizes="any"
+            type="image/svg+xml"
+        />
+        <link rel="manifest" href="./favicon/site.webmanifest" />
+        <link rel="mask-icon" href="./favicon/safari-pinned-tab.svg" />
+        <meta name="msapplication-TileColor" content="#da532c" />
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="stylesheet" href="./css/base.css" />
+        <link rel="stylesheet" href="./css/components.css" />
+        <title>Minimalify</title>
+    </head>
+    <body>
+        <!-- header section -->
+        <object type="image/svg+xml" data="./favicon/favicon.svg" width="150">
+            Update your browser to support support SVG <-- displayed if svg is
+            not supported
+        </object>
+
+        <h1 class="u-mb-none u-mt-none">
+            <span class="u-text-regular"
+                >Minimal<span class="u-text-light">ify</span></span
+            >
+        </h1>
+
+        <i class="u-mt-none">Just minimalify it.</i>
+        <br />
+        <i class="u-mt-none">Find the detailed documentation <a href="https://github.com/ragarwalll/minimalify/docs" target="_blank" class="u-link-clean">here</a>.</i>
+        <!-- end of header section -->
+
+        <br /><br />
+
+        <!-- about section -->
+        <div class="changeable-section c-heading-anchor">
+            <h2 class="u-inline u-mb-none">What is it?</h2>
+            <a href="#about" class="c-heading-anchor__link">#</a>
+        </div>
+        <p></p>
+        <div class="about-fake">
+            <p>
+                A zero-dependency CLI/library for building blazing-fast, static
+                HTML/CSS/JS sites with reusable components. Drop in your source,
+                define a tiny config, run <u>minimalify build</u>, and get a
+                fully inlined, minified <i>build/</i> folder ready for
+                deployment.
+            </p>
+        </div>
+        <!-- end of about section -->
+
+         <!-- why section -->
+      <div class="changeable-section c-heading-anchor">
+        <h2 class="u-inline u-mb-none">Why Minimalify?</h2>
+        <a href="#why" class="c-heading-anchor__link">#</a>
+        <h5 class="u-mt-none u-text-light">
+          Why not? Uses dope data structures (I get 'em, lol) to make life easy.
+        </h5>
+      </div>
+
+      <ul>
+        <li>Auto-bundle & minify CSS/JS, PurgeCSS.</li>
+        <li>Dependency-graph driven incremental builds.</li>
+        <li>Inline reusable templates.</li>
+        <li>Image optimization & versioned assets.</li>
+        <li>Zero-config dev server with HMR.</li>
+        <li>Plugin architecture for a11y, SEO, linting & more.</li>
+      </ul>
+
+        <!-- end of why section -->
+
+        <!-- download section -->
+        <div class="changeable-section c-heading-anchor">
+            <h2 class="u-inline u-mb-none">Quickstart</h2>
+            <a href="#quickstar" class="c-heading-anchor__link">#</a>
+        </div>
+        <p></p>
+        <div class="about-fake">
+            <div>
+                ① Install Minimalify:
+                <pre class="code-snippet">
+npm install --save-dev minimalify
+                </pre>
+            </div>
+            <div>
+                ② Scaffold config
+                <pre class="code-snippet">
+npx minimalify init
+                </pre>
+            </div>
+            <div>
+                ③ Build or Develop
+                <pre class="code-snippet">
+npx minimalify build
+npx minimalify dev
+                </pre>
+            </div>
+        </div>
+        <!-- end of download section -->
+
+        <!-- contact section -->
+        <div class="changeable-section">
+            <div class="c-heading-anchor">
+                <h2 class="u-inline u-mb-none">
+                    Find me on these platforms.
+                </h2>
+                <a href="#contact" class="c-heading-anchor__link">#</a>
+            </div>
+            <div class="c-contact">
+                <a
+                    href="https://github.com/ragarwalll"
+                    target="_blank"
+                    class="u-link-clean"
+                    >GitHub</a
+                >
+                ⊙
+                <a
+                    href="https://www.linkedin.com/in/ragarwalll/"
+                    target="_blank"
+                    class="u-link-clean"
+                    >LinkedIn</a
+                >
+                ⊙
+                <a
+                    href="mailto:contact@therahulagarwal.com"
+                    target="_blank"
+                    class="u-link-clean"
+                    >contact@therahulagarwal.com</a
+                >
+                ⊙
+                <a
+                    href="mailto:agarwal.rahul324@gmail.com"
+                    target="_blank"
+                    class="u-link-clean"
+                    >agarwal.rahul324@gmail.com</a
+                >
+                ⊙
+                <a
+                    href="https://bsky.app/profile/therahulagarwal.com"
+                    target="_blank"
+                    class="u-link-clean"
+                    >BlueSky</a
+                >
+                ⊙
+                <a
+                    href="https://www.instagram.com/rahulllagarwalll/"
+                    target="_blank"
+                    class="u-link-clean"
+                    >Instagram</a
+                >
+            </div>
+        </div>
+        <!-- end of contact section -->
+
+        <!-- footer section/copyright section -->
+        <footer class="some-margin-top">
+            <p>
+                Copyright © Rahul Agarwal
+                <script>
+                    document.write(new Date().getFullYear());
+                </script>
+                <i
+                    ><br />find the source code
+                    <a
+                        href="https://github.com/ragarwalll/minimalify"
+                        target="_blank"
+                        class="u-link-clean"
+                        >here</a
+                    >.</i
+                >
+                <i
+                    ><br />find the detailed documentation
+                    <a
+                        href="https://github.com/ragarwalll/minimalify/docs"
+                        target="_blank"
+                        class="u-link-clean"
+                        >here</a
+                    >.</i
+                >
+                <i
+                    ><br />find my portfolio
+                    <a
+                        href="https://therahulagarwal.com/"
+                        target="_blank"
+                        class="u-link-clean"
+                        >here</a
+                    >.</i
+                >
+            </p>
+        </footer>
+        <!-- end of footer section -->
+
+        <!-- linking script sections -->
+        <script type="text/javascript" src="./js/script.js" defer></script>
+    </body>
+</html>
