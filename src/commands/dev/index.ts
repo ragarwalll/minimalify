@@ -115,11 +115,19 @@ export const dev = async (cfgPath: string) => {
     );
 
     app.get(/^\/(.+\.html)$/, (req, res, next) => {
-        const f = path.join(cfg.outDir, req.path);
-        if (!fs.existsSync(f)) return next();
-        let html = fs.readFileSync(f, 'utf8');
-        html = html.replace(/<\/body>/, LIVE_SNIPPET);
-        res.send(html);
+        try {
+            const resolvedPath = path.resolve(cfg.outDir, '.' + req.path); // Normalize the path
+            if (!resolvedPath.startsWith(cfg.outDir)) { // Ensure the path is within cfg.outDir
+                res.status(403).send('Forbidden');
+                return;
+            }
+            if (!fs.existsSync(resolvedPath)) return next();
+            let html = fs.readFileSync(resolvedPath, 'utf8');
+            html = html.replace(/<\/body>/, LIVE_SNIPPET);
+            res.send(html);
+        } catch (err) {
+            res.status(500).send('Internal Server Error');
+        }
     });
 
     app.use(express.static(cfg.outDir));
