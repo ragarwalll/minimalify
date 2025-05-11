@@ -10,6 +10,14 @@ import {
     gatherTemplateFiles,
 } from '@/utils/glob.js';
 import { type DefaultTreeAdapterMap, parse } from 'parse5';
+import {
+    isCssValidForProcessing,
+    isImgValidForProcessing,
+    isJsValidForProcessing,
+    isObjectValidForProcessing,
+} from '@/utils/assets-detector.js';
+import { walkHtmlTree } from '@/utils/html-walk.js';
+import { MATCH_TEMPLATE_REGEX } from '@/utils/constants/regex.js';
 
 export type NodeType = 'css' | 'js' | 'tmpl' | 'page' | 'img';
 const regexCheckTemplatesDir = /\.(html|md)$/;
@@ -53,13 +61,17 @@ export class BuildGraph {
      */
     private async _buildTemplateNodes() {
         const localTemplatesFiles = await gatherTemplateFiles(this.config);
+
         for (const templateFilePath of localTemplatesFiles) {
             if (!regexCheckTemplatesDir.test(templateFilePath)) continue;
-            const templateName = templateFilePath.replace(
-                regexCheckTemplatesDir,
-                '',
+
+            const rel = path.relative(
+                this.config.srcDir,
+                templateFilePath.replace(regexCheckTemplatesDir, ''),
             );
-            const node = `tmpl:${templateName}`;
+            const node = `tmpl:${rel}`;
+
+            this.fileToNode.set(templateFilePath, node);
             this.nodeType.set(node, 'tmpl');
         }
     }
@@ -69,9 +81,11 @@ export class BuildGraph {
      */
     private async _buildCssNodes() {
         const localCssFiles = await gatherCssFiles(this.config);
+
         for (const cssFilePath of localCssFiles) {
             const rel = path.relative(this.config.srcDir, cssFilePath);
             const node = `css:${rel}`;
+
             this.fileToNode.set(cssFilePath, node);
             this.nodeType.set(node, 'css');
         }
@@ -82,9 +96,11 @@ export class BuildGraph {
      */
     private async _buildJsNodes() {
         const localJsFiles = await gatherJsFiles(this.config);
+
         for (const jsFilePath of localJsFiles) {
             const rel = path.relative(this.config.srcDir, jsFilePath);
             const node = `js:${rel}`;
+
             this.fileToNode.set(jsFilePath, node);
             this.nodeType.set(node, 'js');
         }
@@ -95,9 +111,11 @@ export class BuildGraph {
      */
     private async _buildImgNodes() {
         const localImgFiles = await gatherImgFiles(this.config);
+
         for (const imgFilePath of localImgFiles) {
             const rel = path.relative(this.config.srcDir, imgFilePath);
             const node = `img:${rel}`;
+
             this.fileToNode.set(imgFilePath, node);
             this.nodeType.set(node, 'img');
         }
@@ -108,9 +126,11 @@ export class BuildGraph {
      */
     private async _buildPageNodes() {
         const localHtmlFiles = await gatherHtmlPages(this.config);
+
         for (const htmlFilePath of localHtmlFiles) {
             const rel = path.relative(this.config.srcDir, htmlFilePath);
             const node = `page:${rel}`;
+
             this.fileToNode.set(htmlFilePath, node);
             this.nodeType.set(node, 'page');
 
@@ -118,7 +138,8 @@ export class BuildGraph {
             const doc = parse(
                 raw,
             ) as unknown as DefaultTreeAdapterMap['element'];
-            this._scanDeps(doc, htmlFilePath);
+
+            await this._scanDeps(doc, htmlFilePath);
         }
     }
 
@@ -127,68 +148,122 @@ export class BuildGraph {
      * @param node the current node in the HTML document
      * @param htmlFilePath the file path of the HTML document
      */
-    private _scanDeps(
+    private async _scanDeps(
         node: DefaultTreeAdapterMap['element'],
         htmlFilePath: string,
     ) {
-        if (!node) return;
-        if (node.tagName) {
-            const relPath = path.relative(this.config.srcDir, htmlFilePath);
-            const pageNode = `page:${relPath}`;
+        const relPath = path.relative(this.config.srcDir, htmlFilePath);
+        const pageNode = `page:${relPath}`;
 
-            // Scan for <link> tags
-            if (node.tagName === 'link') {
-                const rel = node.attrs.find(
-                    (a: any) => a.name === 'rel',
-                )?.value;
-                const href = node.attrs.find(
-                    (a: any) => a.name === 'href',
-                )?.value;
-                if (rel === 'stylesheet' && href && !/^https?:/.test(href)) {
-                    const abs = path.resolve(this.config.srcDir, href);
-                    if (fs.existsSync(abs)) {
-                        const cssNode = `css:${path.relative(this.config.srcDir, abs)}`;
-                        this.deps.addDependency(pageNode, cssNode);
-                    }
-                }
-            }
-
-            // Scan for <script> tags
-            if (node.tagName === 'script') {
-                const src = node.attrs.find(
-                    (a: any) => a.name === 'src',
-                )?.value;
-                if (src && !/^https?:/.test(src)) {
-                    const abs = path.resolve(this.config.srcDir, src);
-                    if (fs.existsSync(abs)) {
-                        const jsNode = `js:${path.relative(this.config.srcDir, abs)}`;
-                        this.deps.addDependency(pageNode, jsNode);
-                    }
-                }
-            }
-
-            // Scan for <img> tags
-            if (node.tagName === 'img') {
-                const src = node.attrs.find(
-                    (a: any) => a.name === 'src',
-                )?.value;
-                if (src && !/^https?:/.test(src)) {
-                    const abs = path.resolve(this.config.srcDir, src);
-                    if (fs.existsSync(abs)) {
-                        const imgNode = `img:${path.relative(this.config.srcDir, abs)}`;
-                        this.deps.addDependency(pageNode, imgNode);
-                    }
-                }
-            }
-
-            // Scan for <template> tags
-            const m = /^include-(.+)$/.exec(node.tagName);
-            if (m) {
-                const tplNode = `tmpl:${m[1]}`;
-                this.deps.addDependency(pageNode, tplNode);
-            }
-        }
-        node.childNodes?.forEach((c: any) => this._scanDeps(c, htmlFilePath));
+        await walkHtmlTree(node, {
+            defaultDescend: true,
+            handlers: [
+                {
+                    match: 'script',
+                    fns: [
+                        (node) => {
+                            const { isValid, value } = isJsValidForProcessing({
+                                node,
+                                cfg: this.config,
+                                checkRemoteUri: false,
+                            });
+                            if (isValid) {
+                                const jsRelPath = path.resolve(
+                                    this.config.srcDir,
+                                    value,
+                                );
+                                if (fs.existsSync(jsRelPath)) {
+                                    const jsNode = `js:${path.relative(this.config.srcDir, jsRelPath)}`;
+                                    this.deps.addDependency(pageNode, jsNode);
+                                }
+                            }
+                        },
+                    ],
+                },
+                {
+                    match: 'link',
+                    fns: [
+                        (node) => {
+                            const { isValid, value } = isCssValidForProcessing({
+                                node,
+                                cfg: this.config,
+                                checkRemoteUri: false,
+                            });
+                            if (isValid) {
+                                const cssRelPath = path.resolve(
+                                    this.config.srcDir,
+                                    value,
+                                );
+                                if (fs.existsSync(cssRelPath)) {
+                                    const cssNode = `css:${path.relative(this.config.srcDir, cssRelPath)}`;
+                                    this.deps.addDependency(pageNode, cssNode);
+                                }
+                            }
+                        },
+                    ],
+                },
+                {
+                    match: 'img',
+                    fns: [
+                        (node) => {
+                            const { isValid, value } = isImgValidForProcessing({
+                                node,
+                                cfg: this.config,
+                                checkRemoteUri: false,
+                            });
+                            if (isValid) {
+                                const imgRelPath = path.resolve(
+                                    this.config.srcDir,
+                                    value,
+                                );
+                                if (fs.existsSync(imgRelPath)) {
+                                    const imgNode = `img:${path.relative(this.config.srcDir, imgRelPath)}`;
+                                    this.deps.addDependency(pageNode, imgNode);
+                                }
+                            }
+                        },
+                    ],
+                },
+                {
+                    match: 'object',
+                    fns: [
+                        (node) => {
+                            const { isValid, value } =
+                                isObjectValidForProcessing({
+                                    node,
+                                    cfg: this.config,
+                                    checkRemoteUri: false,
+                                });
+                            if (isValid) {
+                                const objectRelPath = path.resolve(
+                                    this.config.srcDir,
+                                    value,
+                                );
+                                if (fs.existsSync(objectRelPath)) {
+                                    const objectNode = `img:${path.relative(this.config.srcDir, objectRelPath)}`;
+                                    this.deps.addDependency(
+                                        pageNode,
+                                        objectNode,
+                                    );
+                                }
+                            }
+                        },
+                    ],
+                },
+                {
+                    match: MATCH_TEMPLATE_REGEX,
+                    fns: [
+                        (node) => {
+                            const m = MATCH_TEMPLATE_REGEX.exec(node.tagName);
+                            if (m) {
+                                const tplNode = `tmpl:${m[1]}`;
+                                this.deps.addDependency(pageNode, tplNode);
+                            }
+                        },
+                    ],
+                },
+            ],
+        });
     }
 
     /**
@@ -217,9 +292,10 @@ export class BuildGraph {
     getAllPages() {
         const pages = new Set<string>();
         for (const [_, node] of this.fileToNode.entries()) {
-            if (this.getNodeType(node) === 'page') {
-                pages.add(node.split(':')[1] ?? '');
-            }
+            const [type, relPath] = node.split(':');
+            if (type == undefined) continue;
+            if (relPath == undefined) continue;
+            if (type === 'page') pages.add(relPath);
         }
         return Array.from(pages);
     }

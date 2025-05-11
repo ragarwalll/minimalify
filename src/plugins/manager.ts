@@ -72,6 +72,7 @@ export class MinimalifyPluginManager {
         let result: any = undefined;
         for (const plugin of this.plugins) {
             if (plugin[hook] && typeof plugin[hook] === 'function') {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
                 result = await (plugin[hook] as Function)(
                     ...(Array.isArray(result) ? result : args),
                 );

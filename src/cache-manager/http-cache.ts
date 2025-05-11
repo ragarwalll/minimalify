@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import axios from 'axios';
+import axios, { type AxiosRequestConfig } from 'axios';
 import { ensureDir } from '@/utils/dir.js';
 import { logError, logger } from '@/utils/logger.js';
 import { CACHE_POST_DIR } from '@/utils/constants/cache.js';
@@ -11,6 +11,7 @@ import {
     HEADER_LAST_MODIFIED,
 } from '@/utils/constants/headers.js';
 import chalk from 'chalk';
+import { type MinimalifyConfig } from '@/config/struct.js';
 
 /**
  * Cache metadata for HTTP responses.
@@ -27,18 +28,31 @@ interface CacheMeta {
  */
 export class HTTPCache {
     private cacheDir: string;
+    private cfg: MinimalifyConfig;
+    private enabled: boolean;
 
     /**
      * Create a new HTTP cache.
      *
      * @param baseDir The base directory to store the cache in.
      */
-    constructor(baseDir: string) {
-        this.cacheDir = path.join(baseDir, CACHE_POST_DIR);
-        ensureDir(this.cacheDir);
-        logger.debug(
-            `using cache directory → ${chalk.underline(path.relative(process.cwd(), this.cacheDir))}`,
-        );
+    constructor(cfg: MinimalifyConfig, baseDir: string) {
+        this.cfg = cfg;
+
+        // check if cache is enabled (this.cfg.cache)
+        // in key is not enabled, we assume that the cache is enabled
+        if (this.cfg.cache === undefined || this.cfg.cache === true) {
+            this.enabled = true;
+            this.cacheDir = path.join(baseDir, CACHE_POST_DIR);
+            ensureDir(this.cacheDir);
+            logger.debug(
+                `using cache directory → ${chalk.underline(path.relative(process.cwd(), this.cacheDir))}`,
+            );
+        } else {
+            this.enabled = false;
+            this.cacheDir = '';
+            logger.debug(`cache is disabled, not using cache directory`);
+        }
     }
 
     /**
@@ -50,6 +64,14 @@ export class HTTPCache {
      * @returns    the response text
      */
     async fetch(url: string): Promise<string> {
+        if (!this.enabled) {
+            return (
+                await this._callUri(url, {
+                    responseType: 'text',
+                    validateStatus: (s) => s < 500,
+                })
+            ).data as string;
+        }
         const key = encodeURIComponent(url);
         const bodyPath = path.join(this.cacheDir, key + '.body');
         const metaPath = path.join(this.cacheDir, key + '.json');
@@ -77,7 +99,7 @@ export class HTTPCache {
         }
 
         // make request
-        const res = await axios.get(url, {
+        const res = await this._callUri(url, {
             headers,
             validateStatus: (s) => s < 500,
             responseType: 'text',
@@ -104,5 +126,15 @@ export class HTTPCache {
 
         fs.writeFileSync(metaPath, JSON.stringify(newMeta), 'utf8');
         return res.data;
+    }
+
+    /**
+     * Retrives the url for the given URL.
+     * @param url the resource URL
+     * @param config the axios request config
+     * @returns the response
+     */
+    protected _callUri(url: string, config: AxiosRequestConfig) {
+        return axios.get(url, config);
     }
 }

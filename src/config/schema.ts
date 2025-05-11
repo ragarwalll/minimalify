@@ -1,3 +1,4 @@
+// TODO: fix
 export const MinimalifySchema = {
     $schema: 'http://json-schema.org/draft-07/schema#',
     title: 'MinimalifyConfig',
@@ -18,8 +19,38 @@ export const MinimalifySchema = {
                 type: 'string',
             },
         },
-        htmlMinify: {
-            $ref: '#/$defs/HTMLMinifierOptions',
+        html: {
+            type: 'object',
+            description: 'html options',
+            properties: {
+                minify: {
+                    type: 'boolean',
+                },
+            },
+            required: ['minify'],
+            additionalProperties: false,
+        },
+        css: {
+            type: 'object',
+            description: 'css options',
+            properties: {
+                minify: {
+                    type: 'boolean',
+                },
+            },
+            required: ['minify'],
+            additionalProperties: false,
+        },
+        js: {
+            type: 'object',
+            description: 'js options',
+            properties: {
+                minify: {
+                    type: 'boolean',
+                },
+            },
+            required: ['minify'],
+            additionalProperties: false,
         },
         templatesDir: {
             type: 'string',
@@ -107,7 +138,6 @@ export const MinimalifySchema = {
         'srcDir',
         'outDir',
         'sharedDomains',
-        'htmlMinify',
         'templatesDir',
         'images',
         'dev',

@@ -20,22 +20,21 @@ const limit = pLimit(concurrency);
 export const imageOptimizer: MinimalifyPlugin = {
     name: 'image-optimizer',
 
-    async onAsset(_cfg, type, _src, dest) {
+    async onAsset(cfg, type, _src, dest) {
         if (type !== 'image') return;
+        if (!cfg.images.optimize) return;
         logger.debug(
             `${this.name}-plugin: optimizing image → ${path.relative(process.cwd(), dest)}`,
         );
 
         const ext = path.extname(dest).toLowerCase();
-        if (!['.png', '.jpg', '.jpeg', '.webp'].includes(ext)) return;
+        if (!cfg.images.supportedFormats.includes(ext.substring(1))) return;
 
         try {
             await limit(async () => {
                 // Read, optimize, and overwrite
                 const buffer = fs.readFileSync(dest);
-                const optimized = await sharp(buffer)
-                    .toFormat(ext === '.png' ? 'png' : 'jpeg', { quality: 80 })
-                    .toBuffer();
+                const optimized = await sharp(buffer).toBuffer();
                 fs.writeFileSync(dest, optimized);
             });
             logger.debug(

@@ -12,13 +12,12 @@ export async function dynamicImport<T = any>(modulePath: string): Promise<T> {
     // We also guard against bundlers swallowing the import by adding webpackIgnore.
     if (typeof require === 'function') {
         // Note: require is sync, but we wrap in a Promise to unify the API.
-        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         return Promise.resolve(require(modulePath) as T);
     } else {
         // webpackIgnore prevents Webpack from trying to statically analyze this import
         // so that it truly happens at runtime.
         // Other bundlers may need their own pragmas.
-        // @ts-ignore
         return (await import(/* webpackIgnore: true */ modulePath)) as T;
     }
 }

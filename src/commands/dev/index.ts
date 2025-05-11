@@ -111,13 +111,16 @@ export const dev = async (cfgPath: string) => {
     // Serve only specific subdirectories or files from node_modules
     app.use(
         '/_modules/morphdom',
-        express.static(path.resolve(process.cwd(), 'node_modules/morphdom/dist')),
+        express.static(
+            path.resolve(process.cwd(), 'node_modules/morphdom/dist'),
+        ),
     );
 
     app.get(/^\/(.+\.html)$/, (req, res, next) => {
         try {
             const resolvedPath = path.resolve(cfg.outDir, '.' + req.path); // Normalize the path
-            if (!resolvedPath.startsWith(cfg.outDir)) { // Ensure the path is within cfg.outDir
+            if (!resolvedPath.startsWith(cfg.outDir)) {
+                // Ensure the path is within cfg.outDir
                 res.status(403).send('Forbidden');
                 return;
             }

@@ -24,7 +24,11 @@ import { BundleError } from '@/error/bundle-error.js';
 import { PurgeCSS } from 'purgecss';
 import { createHash } from 'crypto';
 import { LRUCache } from 'lru-cache';
-import { CSS_BUNDLE_NAME, JS_BUNDLE_NAME } from '@/utils/constants/bundle.js';
+import {
+    CSS_BUNDLE_NAME,
+    IMG_BUNDLE_DIR,
+    JS_BUNDLE_NAME,
+} from '@/utils/constants/bundle.js';
 import { HTMLError } from '@/error/html-error.js';
 import MarkdownIt from 'markdown-it';
 import { logger } from '@/utils/logger.js';
@@ -32,31 +36,24 @@ import pkg from 'bloom-filters';
 import { CACHE_DIR } from '@/utils/constants/cache.js';
 import {
     isCssValidForProcessing,
+    isImgValidForProcessing,
     isJsValidForProcessing,
-} from '@/utils/detect-css-js.js';
+    isObjectValidForProcessing,
+} from '@/utils/assets-detector.js';
 import chalk from 'chalk';
+import { walkHtmlTree } from '@/utils/html-walk.js';
+import { MATCH_TEMPLATE_REGEX } from '@/utils/constants/regex.js';
+import { formatImageName } from '@/utils/assets-name-formatter.js';
 
 const { BloomFilter } = pkg;
 
-// regex
-const MATCH_TEMPLATE_REGEX = /^include-(.+)$/;
 const MATCH_CHILDREN_REGEX = /\{\{children\}\}/g;
 
 const concurrency = os.cpus().length;
 const limit = pLimit(concurrency);
-// const limit = (fn: () => Promise<any>) => {
-//     return new Promise((resolve, reject) => {
-//         fn()
-//             .then(resolve)
-//             .catch((err) => {
-//                 logger.error(chalk.red('Error in async function: ', err));
-//                 reject(err);
-//             });
-//     });
-// };
 
 // Bloom filter for URLs
-const urlBloom = BloomFilter.from([], 0.01, 1000);
+const urlBloom = BloomFilter.create(1000, 0.01);
 
 // LRU caches for transform results
 const cssCache = new LRUCache<string, string>({ max: 100 });
@@ -84,7 +81,10 @@ export class Builder {
      */
     constructor(cfg: MinimalifyConfig) {
         this.cfg = cfg;
-        this.httpCache = new HTTPCache(path.join(process.cwd(), CACHE_DIR));
+        this.httpCache = new HTTPCache(
+            cfg,
+            path.join(process.cwd(), CACHE_DIR),
+        );
         this.plugins = new MinimalifyPluginManager();
     }
 
@@ -109,6 +109,7 @@ export class Builder {
         await this.plugins.callHook('onPreConfig', this.cfg);
 
         this.graph = new BuildGraph(this.cfg);
+        console.log(Object.keys(this.templates));
         await this.graph.init();
     }
 
@@ -133,23 +134,36 @@ export class Builder {
             `cleaning output directory → ${chalk.underline(path.basename(this.cfg.outDir))}`,
         );
 
-        const { sharedCssUri, sharedJsUri } = await this._getSharedAssetsUri();
+        const { sharedCssUri, sharedJsUri, sharedImgUri } =
+            await this._getSharedAssetsUri();
 
-        if (sharedCssUri.length === 0 && sharedJsUri.length === 0) {
-            logger.warn('no shared assets found. Skipping CSS and JS build...');
+        if (
+            sharedCssUri.length === 0 &&
+            sharedJsUri.length === 0 &&
+            sharedImgUri.length === 0
+        ) {
+            logger.warn(
+                'no shared assets found. Skipping CSS, JS and IMG build...',
+            );
         } else {
             logger.info(
                 `shared CSS assets found → ${chalk.underline(sharedCssUri.join(', '))}`,
             );
+            logger.info(
+                `shared JS assets found → ${chalk.underline(sharedJsUri.join(', '))}`,
+            );
+            logger.info(
+                `shared IMG assets found → ${chalk.underline(sharedImgUri.join(', '))}`,
+            );
         }
 
-        logger.spinner.update('building & minifying CSS and JS assets');
+        logger.spinner.update('building & minifying CSS, JS and IMG assets');
 
         // parallelize independent steps
         await Promise.all([
             this._buildCss(sharedCssUri),
             this._buildJs(sharedJsUri),
-            // this._copyAssets()
+            this._copyAssets(sharedImgUri),
         ]);
 
         logger.spinner.update('processing HTML pages...');
@@ -207,16 +221,104 @@ export class Builder {
     }
 
     /**
+     * Copy the assets to the output directory.
+     *
+     * @returns {Promise<void>} - the build result
+     */
+    private async _copyAssets(assetsUri: string[] = []) {
+        // 1. Clean & ensure the output directory
+        const outDir = path.join(this.cfg.outDir, IMG_BUNDLE_DIR);
+        ensureDir(outDir);
+        cleanDir(outDir);
+
+        // 2. Download & load shared assets & call the hook
+        await Promise.all(
+            assetsUri.map((uri) =>
+                limit(async () => {
+                    if (urlBloom.has(uri)) {
+                        logger.debug(
+                            `skipping asset ${uri} as it is already processed`,
+                        );
+                        return;
+                    }
+                    urlBloom.add(uri);
+
+                    const data = await this.httpCache.fetch(uri);
+
+                    const hex = createHash('md5').update(uri).digest('hex');
+                    const dst = path.join(outDir, `${hex}${path.extname(uri)}`);
+                    logger.debug(`copying asset to disk → ${dst}`);
+
+                    ensureDir(path.dirname(dst));
+                    fs.writeFileSync(dst, data);
+
+                    await this.plugins.callHook(
+                        'onAsset',
+                        this.cfg,
+                        'image',
+                        data,
+                        dst,
+                    );
+                }),
+            ),
+        );
+
+        // 3. Gather local assets
+        let localAssetsUri = await gatherLocalAsstesUri(this.cfg, 'img');
+        await Promise.all(
+            localAssetsUri.map((uri) =>
+                limit(async () => {
+                    if (urlBloom.has(uri)) {
+                        logger.debug(
+                            `skipping asset ${uri} as it is already processed`,
+                        );
+                        return;
+                    }
+                    urlBloom.add(uri);
+
+                    const data = fs.readFileSync(uri);
+
+                    const dst = path.join(
+                        outDir,
+                        path.relative(this.cfg.srcDir, uri),
+                    );
+                    logger.debug(`copying asset to disk → ${dst}`);
+
+                    ensureDir(path.dirname(dst));
+                    fs.writeFileSync(dst, data);
+
+                    await this.plugins.callHook(
+                        'onAsset',
+                        this.cfg,
+                        'image',
+                        '',
+                        dst,
+                    );
+                }),
+            ),
+        );
+
+        logger.debug(`proccessed ${assetsUri.length} assets`);
+        logger.debug(`proccessed ${localAssetsUri.length} local assets`);
+    }
+
+    /**
      * Build the templates. md files are converted to HTML.
      * @returns {Promise<void>} - the build result
      */
     private _buildTemplates() {
         const mdHandler = new MarkdownIt();
         const templates: Record<string, string> = {};
-        if (fs.existsSync(path.join(this.cfg.srcDir, this.cfg.templatesDir))) {
+
+        if (
+            this.cfg.templatesDir &&
+            this.cfg.templatesDir.length > 0 &&
+            fs.existsSync(path.join(this.cfg.srcDir, this.cfg.templatesDir))
+        ) {
             const files = fs.readdirSync(
                 path.join(this.cfg.srcDir, this.cfg.templatesDir),
             );
+
             for (const file of files) {
                 if (!file.endsWith('.html') && !file.endsWith('.md')) {
                     continue;
@@ -226,6 +328,7 @@ export class Builder {
                     path.join(this.cfg.srcDir, this.cfg.templatesDir, file),
                     'utf8',
                 );
+
                 if (file.endsWith('.md')) txt = mdHandler.render(txt);
                 templates[file.replace(/\.(html|md)$/, '')] = txt;
             }
@@ -254,22 +357,8 @@ export class Builder {
 
         // 2. Download & load shared assets & call the hook
         const assets = [];
-        const total = assetsUri.length;
-        if (total > 0) {
-            console.log();
-            logger.spinner.stop();
-            logger.progress.start({
-                total,
-                format: `Downloading ${type.toUpperCase()} |{bar}| {percentage}% || {value}/{total} files`,
-            });
-        }
 
-        for (let i = 0; i < total; i++) {
-            const uri = assetsUri[i];
-            if (!uri) {
-                logger.progress.update(i + 1);
-                continue;
-            }
+        for (let uri of assetsUri) {
             if (!urlBloom.has(uri)) urlBloom.add(uri);
             const data = await this.httpCache.fetch(uri);
             await this.plugins.callHook(
@@ -280,13 +369,6 @@ export class Builder {
                 outDir,
             );
             assets.push(data);
-            logger.progress.update(i + 1);
-        }
-
-        if (total > 0) {
-            logger.progress.stop();
-            console.log();
-            logger.spinner.start('building & minifying CSS and JS assets');
         }
 
         // 3. Gather local assets
@@ -344,15 +426,19 @@ export class Builder {
      * Get the shared assets URI from HTML pages
      * @returns {Promise<void>} - the build result
      */
-    private async _getSharedAssetsUri() {
+    private async _getSharedAssetsUri(): Promise<{
+        sharedCssUri: string[];
+        sharedJsUri: string[];
+        sharedImgUri: string[];
+    }> {
         const pages = this.graph?.getAllPages();
-
         if (!pages || pages.length === 0) {
             throw new GraphError('no html pages found to be processed');
         }
 
         const sharedCss = new Set<string>();
         const sharedJs = new Set<string>();
+        const sharedImg = new Set<string>();
 
         for (const page of pages) {
             // read the html page
@@ -362,42 +448,77 @@ export class Builder {
             );
 
             // parse the html page
-            const doc = parseFragment(rawHtml);
+            const doc = parseFragment(
+                rawHtml,
+            ) as unknown as DefaultTreeAdapterMap['element'];
 
-            doc.childNodes.forEach((node) => {
-                if (
-                    node.nodeName === 'link' &&
-                    node.attrs.some(
-                        (attr) =>
-                            attr.name === 'rel' && attr.value === 'stylesheet',
-                    )
-                ) {
-                    const href = node.attrs.find(
-                        (attr) => attr.name === 'href',
-                    )?.value;
-                    if (
-                        href &&
-                        this.cfg.sharedDomains.some((d) => href.startsWith(d))
-                    ) {
-                        sharedCss.add(href);
-                    }
-                } else if (node.nodeName === 'script') {
-                    const src = node.attrs.find(
-                        (attr) => attr.name === 'src',
-                    )?.value;
-                    if (
-                        src &&
-                        this.cfg.sharedDomains.some((d) => src.startsWith(d))
-                    ) {
-                        sharedJs.add(src);
-                    }
-                }
+            await walkHtmlTree(doc, {
+                defaultDescend: true,
+                handlers: [
+                    {
+                        match: 'link',
+                        fns: [
+                            (node) => {
+                                const { isValid, value } =
+                                    isCssValidForProcessing({
+                                        node,
+                                        cfg: this.cfg,
+                                        checkLocalUri: false,
+                                    });
+                                if (isValid) sharedCss.add(value);
+                            },
+                        ],
+                    },
+                    {
+                        match: 'script',
+                        fns: [
+                            (node) => {
+                                const { isValid, value } =
+                                    isJsValidForProcessing({
+                                        node,
+                                        cfg: this.cfg,
+                                        checkLocalUri: false,
+                                    });
+                                if (isValid) sharedJs.add(value);
+                            },
+                        ],
+                    },
+                    {
+                        match: 'img',
+                        fns: [
+                            (node) => {
+                                const { isValid, value } =
+                                    isImgValidForProcessing({
+                                        node,
+                                        cfg: this.cfg,
+                                        checkLocalUri: false,
+                                    });
+                                if (isValid) sharedImg.add(value);
+                            },
+                        ],
+                    },
+                    {
+                        match: 'object',
+                        fns: [
+                            (node) => {
+                                const { isValid, value } =
+                                    isObjectValidForProcessing({
+                                        node,
+                                        cfg: this.cfg,
+                                        checkLocalUri: false,
+                                    });
+                                if (isValid) sharedImg.add(value);
+                            },
+                        ],
+                    },
+                ],
             });
         }
 
         return {
             sharedCssUri: Array.from(sharedCss),
             sharedJsUri: Array.from(sharedJs),
+            sharedImgUri: Array.from(sharedImg),
         };
     }
 
@@ -410,7 +531,7 @@ export class Builder {
      */
     private _bundleAndMinify = async (type: 'js' | 'css', bundle: string) => {
         if (!bundle || bundle.trim() == '') return '';
-        if (type === 'css') {
+        if (type === 'css' && this.cfg.css.minify == true) {
             // Purge unused selectors
             const purge = new PurgeCSS();
             const purged = await purge.purge({
@@ -446,7 +567,7 @@ export class Builder {
             }
 
             return finalCss;
-        } else if (type === 'js') {
+        } else if (type === 'js' && this.cfg.js.minify == true) {
             const hash = createHash('md5').update(bundle).digest('hex');
             let finalJs = jsCache.get(hash);
 
@@ -455,34 +576,7 @@ export class Builder {
             if (!finalJs) {
                 logger.debug(`minifying JS bundle using Terser...`);
                 const res = await limit(() =>
-                    minify(bundle, {
-                        compress: {
-                            drop_console: true,
-                            drop_debugger: true,
-                            collapse_vars: true,
-                            reduce_vars: true,
-                            join_vars: true,
-                            hoist_funs: true,
-                            unused: true,
-                            passes: 2,
-                            dead_code: true,
-                            reduce_funcs: true,
-                            sequences: true,
-                            side_effects: true,
-                            toplevel: true,
-                            if_return: true,
-                            inline: true,
-                            comparisons: true,
-                            conditionals: true,
-                            directives: true,
-                            evaluate: true,
-                            properties: true,
-                        },
-                        mangle: true,
-                        output: {
-                            comments: false,
-                        },
-                    }),
+                    minify(bundle, this.cfg.js.terserOptions),
                 );
 
                 if (res.code === undefined) {
@@ -501,7 +595,7 @@ export class Builder {
 
             return finalJs;
         }
-        throw new Error(`unsupported asset type: ${type}`);
+        return bundle;
     };
 
     /**
@@ -518,46 +612,41 @@ export class Builder {
         const doc = parse(raw) as unknown as DefaultTreeAdapterMap['element'];
         await this.plugins.callHook('onPage', this.cfg, absPage, doc);
 
-        // Walk the HTML tree and find shared assets
-        await this._walkHtmlTree(rel, doc, null);
+        // replace the <include-*> tags with the template content
+        // rewrite the <img> and <object> tags with the absolute path
+        await this._processHtmlPageForTmplImg(rel, doc);
 
         // Get the head and body nodes
         const { head, body } = this._getHeadAndBody(doc);
 
+        const removeNodes = (n: DefaultTreeAdapterMap['childNode']) => {
+            const node = n as DefaultTreeAdapterMap['element'];
+            if (node.tagName === 'link') {
+                const { isValid } = isCssValidForProcessing({
+                    node,
+                    cfg: this.cfg,
+                });
+                return !isValid;
+            } else if (node.tagName === 'script') {
+                const { isValid } = isJsValidForProcessing({
+                    node,
+                    cfg: this.cfg,
+                });
+                return !isValid;
+            }
+            return true;
+        };
+
         // remove the style and script tags from the body
         logger.debug(`total child nodes in head → ${head.childNodes.length}`);
-        head.childNodes = head.childNodes.filter((n) => {
-            const node = n as DefaultTreeAdapterMap['element'];
-
-            if (isCssValidForProcessing(node, this.cfg)) {
-                return false;
-            }
-
-            if (isJsValidForProcessing(node, this.cfg)) {
-                return false;
-            }
-
-            return true;
-        });
+        head.childNodes = head.childNodes.filter(removeNodes);
         logger.debug(
             `total child nodes in head after filtering → ${head.childNodes.length}`,
         );
 
         // remove the style and script tags from the body
         logger.debug(`total child nodes in body → ${body.childNodes.length}`);
-        body.childNodes = body.childNodes.filter((n) => {
-            const node = n as DefaultTreeAdapterMap['element'];
-
-            if (isCssValidForProcessing(node, this.cfg)) {
-                return false;
-            }
-
-            if (isJsValidForProcessing(node, this.cfg)) {
-                return false;
-            }
-
-            return true;
-        });
+        body.childNodes = body.childNodes.filter(removeNodes);
         logger.debug(
             `total child nodes in body after filtering → ${body.childNodes.length}`,
         );
@@ -579,8 +668,6 @@ export class Builder {
                     throw new HTMLError('failed to parse script fragment');
                 })(),
         );
-
-        // TODO: rewirite images
 
         // Serialize back to HTML string
         let outHtml = serialize(doc);
@@ -629,77 +716,134 @@ export class Builder {
      * @param node - the current node in the HTML document
      * @param parent - the parent node of the current node
      */
-    private async _walkHtmlTree(
+    private async _processHtmlPageForTmplImg(
         relPage: string,
         node: DefaultTreeAdapterMap['element'],
-        parent: DefaultTreeAdapterMap['element'] | null,
     ) {
-        if (node.tagName) {
-            const tagName = node.tagName as string;
-            const matchTemplate = tagName.match(MATCH_TEMPLATE_REGEX);
+        await walkHtmlTree(node, {
+            defaultDescend: true,
+            handlers: [
+                {
+                    match: MATCH_TEMPLATE_REGEX,
+                    fns: [
+                        (node, parent) => {
+                            const m = MATCH_TEMPLATE_REGEX.exec(node.tagName);
+                            if (!m || !m[1]) {
+                                logger.debug(
+                                    `could not find template tag for → ${chalk.underline(node.tagName)}`,
+                                );
+                                return;
+                            }
 
-            if (matchTemplate && matchTemplate[1]) {
-                const templateTagName = matchTemplate[1];
-                const template = this.templates[templateTagName];
-                if (template) {
-                    // gather attributes
-                    const attrStr =
-                        (node.attrs || [])
-                            .map((a: any) => `${a.name}="${a.value}"`)
-                            .join(' ') || '';
-                    const params = parseAttrs(attrStr);
+                            const templateTagName = m[1];
+                            const template = this.templates[templateTagName];
 
-                    // serialize any innerHTML
-                    const innerHTML =
-                        node.childNodes
-                            ?.map((c: any) => serialize(c))
-                            .join('') || '';
+                            if (!template) {
+                                logger.debug(
+                                    `template not found → ${templateTagName}`,
+                                );
+                                return;
+                            }
 
-                    // perform {{children}} and {{param}} substitution
-                    let inst = template.replace(
-                        MATCH_CHILDREN_REGEX,
-                        innerHTML,
-                    );
-                    for (const [k, v] of Object.entries(params)) {
-                        const esc = v
-                            .replace(/&/g, '&amp;')
-                            .replace(/</g, '&lt;')
-                            .replace(/>/g, '&gt;');
-                        inst = inst.replace(
-                            new RegExp(`\\{\\{${k}\\}\\}`, 'g'),
-                            esc,
-                        );
-                    }
+                            const attrStr =
+                                (node.attrs || [])
+                                    .map((a: any) => `${a.name}="${a.value}"`)
+                                    .join(' ') || '';
+                            const params = parseAttrs(attrStr);
 
-                    // parse substituted HTML into a fragment
-                    const fragment = parseFragment(inst);
+                            // serialize any innerHTML
+                            const innerHTML =
+                                node.childNodes
+                                    ?.map((c: any) => serialize(c))
+                                    .join('') || '';
 
-                    // replace the <include-*> node in parent's childNodes
-                    if (parent && parent.childNodes) {
-                        parent.childNodes = parent.childNodes.flatMap((c) =>
-                            c === node ? fragment.childNodes : c,
-                        );
-                    }
+                            // perform {{children}} and {{param}} substitution
+                            let inst = template.replace(
+                                MATCH_CHILDREN_REGEX,
+                                innerHTML,
+                            );
+                            for (const [k, v] of Object.entries(params)) {
+                                const esc = v
+                                    .replace(/&/g, '&amp;')
+                                    .replace(/</g, '&lt;')
+                                    .replace(/>/g, '&gt;');
+                                inst = inst.replace(
+                                    new RegExp(`\\{\\{${k}\\}\\}`, 'g'),
+                                    esc,
+                                );
+                            }
 
-                    // record dependency for HMR/incremental
-                    this.graph.deps.addDependency(
-                        `page:${relPage}`,
-                        `tmpl:${templateTagName}`,
-                    );
+                            // parse substituted HTML into a fragment
+                            const fragment = parseFragment(inst);
 
-                    // dont recurse into the template
-                    return;
-                } else {
-                    logger.warn(
-                        `[build] template ${templateTagName} not found`,
-                    );
-                }
-            }
-        }
-        // Recurse into child nodes
-        node.childNodes?.forEach((c: any) =>
-            this._walkHtmlTree(relPage, c, node),
-        );
+                            // replace the <include-*> node in parent's childNodes
+                            if (parent && parent.childNodes) {
+                                parent.childNodes = parent.childNodes.flatMap(
+                                    (c) =>
+                                        c === node ? fragment.childNodes : c,
+                                );
+                            }
+
+                            // record dependency for HMR/incremental
+                            this.graph.deps.addDependency(
+                                `page:${relPage}`,
+                                `tmpl:${templateTagName}`,
+                            );
+                        },
+                    ],
+                },
+                {
+                    match: 'img',
+                    descendChildren: false,
+                    fns: [
+                        (node) => {
+                            const { isValid, value } = isImgValidForProcessing({
+                                node,
+                                cfg: this.cfg,
+                            });
+                            if (isValid && value) {
+                                const { filePath } = formatImageName(
+                                    this.cfg,
+                                    value,
+                                    relPage,
+                                );
+                                node.attrs = node.attrs.map((a: any) => {
+                                    if (a.name === 'src') {
+                                        a.value = filePath;
+                                    }
+                                    return a;
+                                });
+                            }
+                        },
+                    ],
+                },
+                {
+                    match: 'object',
+                    fns: [
+                        (node) => {
+                            const { isValid, value } =
+                                isObjectValidForProcessing({
+                                    node,
+                                    cfg: this.cfg,
+                                });
+                            if (isValid && value) {
+                                const { filePath } = formatImageName(
+                                    this.cfg,
+                                    value,
+                                    relPage,
+                                );
+                                node.attrs = node.attrs.map((a: any) => {
+                                    if (a.name === 'data') {
+                                        a.value = filePath;
+                                    }
+                                    return a;
+                                });
+                            }
+                        },
+                    ],
+                },
+            ],
+        });
     }
 
     /**
@@ -743,7 +887,8 @@ export class Builder {
         const node = this.graph.getNodeFromFilePath(absFile);
         if (!node) return [];
         const type = this.graph.getNodeType(node);
-        const { sharedCssUri, sharedJsUri } = await this._getSharedAssetsUri();
+        const { sharedCssUri, sharedJsUri, sharedImgUri } =
+            await this._getSharedAssetsUri();
         if (type === 'css') {
             await this._buildCss(sharedCssUri);
             return [];
@@ -752,9 +897,10 @@ export class Builder {
             await this._buildJs(sharedJsUri);
             return [];
         }
-
-        // TODO: handle assets
-        // if (type === 'img') { await this._copyAssets(); return []; }
+        if (type === 'img') {
+            await this._copyAssets(sharedImgUri);
+            return [];
+        }
 
         // page or template
         const rels =

@@ -1,14 +1,35 @@
 import { type SupportedPlugins } from '@/utils/constants/supported-plugins.js';
+import { type MinifyOptions } from 'terser';
 
 /**
- * MinimalifyConfig is the configuration object for minimalify
+ * HTMLConfig is the configuration object for html minification
  */
-interface HTMLMinifierOptions {
-    collapseWhitespace: boolean;
-    removeComments: boolean;
-    removeRedundantAttributes: boolean;
-    minifyCSS: boolean;
-    minifyJS: boolean;
+interface HTMLConfig {
+    minify: boolean;
+}
+
+/**
+ * JSConfig is the configuration object for js minification
+ */
+interface JSConfig {
+    minify: boolean;
+    terserOptions: MinifyOptions;
+}
+
+/**
+ * CSSConfig is the configuration object for css minification
+ */
+interface CSSConfig {
+    minify: boolean;
+}
+
+/**
+ * ImageConfig is the configuration object for image optimization
+ */
+interface ImageConfig {
+    optimize: boolean;
+    outDir: string;
+    supportedFormats: string[];
 }
 
 /**
@@ -25,17 +46,19 @@ export interface MinimalifyConfig {
     sharedDomains: string[];
 
     // html minifier options
-    htmlMinify: HTMLMinifierOptions;
+    html: HTMLConfig;
+
+    // js minifier options
+    js: JSConfig;
+
+    // css minifier options
+    css: CSSConfig;
+
+    // the images config
+    images: ImageConfig;
 
     // templates dir
     templatesDir: string;
-
-    // images opts
-    images: {
-        optimize: boolean;
-        outDir: string;
-        supportedFormats: string[];
-    };
 
     // dev options
     dev: {
@@ -55,6 +78,9 @@ export interface MinimalifyConfig {
 
     // minimalify plugins
     plugins: SupportedPlugins[];
+
+    // cache options
+    cache?: boolean;
 }
 
 // the available directories in the config
@@ -74,19 +100,22 @@ export const defaultConfig: MinimalifyConfig = {
     srcDir: 'src',
     outDir: 'dist',
     sharedDomains: ['https://therahulagarwal.com'],
-    htmlMinify: {
-        collapseWhitespace: true,
-        removeComments: true,
-        removeRedundantAttributes: true,
-        minifyCSS: true,
-        minifyJS: true,
+    html: {
+        minify: true,
     },
-    templatesDir: 'templates',
+    css: {
+        minify: true,
+    },
+    js: {
+        minify: true,
+        terserOptions: {},
+    },
     images: {
         optimize: false,
         outDir: 'images',
-        supportedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico'],
+        supportedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
     },
+    templatesDir: 'templates',
     dev: {
         port: 3000,
     },

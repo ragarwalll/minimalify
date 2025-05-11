@@ -105,12 +105,14 @@ export const gatherMdFiles = async (cfg: MinimalifyConfig) => {
  */
 export const gatherLocalAsstesUri = async (
     cfg: MinimalifyConfig,
-    type: 'css' | 'js',
+    type: 'css' | 'js' | 'img',
 ) => {
     if (type === 'css') {
         return await gatherCssFiles(cfg);
     } else if (type === 'js') {
         return await gatherJsFiles(cfg);
+    } else if (type === 'img') {
+        return await gatherImgFiles(cfg);
     }
     throw new Error(`Unsupported asset type: ${type}`);
 };

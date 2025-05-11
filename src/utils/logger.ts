@@ -1,7 +1,8 @@
 import chalk from 'chalk';
 import stripAnsi from 'strip-ansi';
 import ora, { type Ora } from 'ora';
-import cliProgress, { type SingleBar } from 'cli-progress';
+import { SingleBar, Presets } from 'cli-progress';
+// eslint-disable-next-line import/no-named-as-default
 import Table from 'cli-table3';
 import { codeFrameColumns } from '@babel/code-frame';
 import { isKnownError, toKnownError } from '@/error/index.js';
@@ -344,14 +345,14 @@ export class FancyLogger extends BaseLogger {
 
         this.progress = {
             start: (opts = {}) => {
-                this.nativeProgress = new cliProgress.SingleBar(
+                this.nativeProgress = new SingleBar(
                     {
                         format:
                             opts.format ??
                             '{bar} {percentage}% | {value}/{total}',
                         hideCursor: true,
                     },
-                    cliProgress.Presets.shades_classic,
+                    Presets.shades_classic,
                 );
                 this.nativeProgress.start(opts.total ?? 100, 0);
             },
