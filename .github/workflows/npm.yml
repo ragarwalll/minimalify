@@ -1,0 +1,87 @@
+# .github/workflows/release.yml
+name: Release
+
+permissions:
+  contents: write   # for pushing changelog & creating the release
+  packages: write   # for npm publish
+
+on:
+  push:
+    tags:
+      - '*'          # on every tag push
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) Checkout main so we can update CHANGELOG.md
+      - name: Checkout main
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 0
+
+      # 2) Install & build
+      - name: Use Node.js (from .nvmrc)
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          registry-url: https://registry.npmjs.org/
+      - run: npm ci
+      - run: npm run build
+
+      # 3) Generate the new section in CHANGELOG.md
+      - name: Generate CHANGELOG.md entry
+        run: |
+          npx conventional-changelog \
+            -p angular \
+            -i CHANGELOG.md \
+            -s \
+            -r 0
+
+      # 4) Commit & push CHANGELOG.md back to main
+      - name: Commit & push changelog
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git diff --quiet \
+            || (git commit -m "chore: update CHANGELOG for ${{ github.ref_name }}" \
+                && git push origin main)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 5) Extract just the new release notes into a file
+      - name: Extract release notes
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          awk -v tag="## [${TAG}]" '
+            $0==tag       {flag=1; next}
+            /^## \[/ && flag {exit}
+            flag          {print}
+          ' CHANGELOG.md > release-notes.md
+
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const tag = context.ref.replace('refs/tags/', '');
+            const body = fs.readFileSync('release-notes.md', 'utf8').trim();
+            const release = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: tag,
+              name: `${tag}`,
+              body,
+            });
+            core.setOutput('upload_url', release.data.upload_url);

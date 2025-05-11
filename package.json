@@ -1,13 +1,16 @@
 {
     "name": "minimalify",
-    "version": "0.0.0",
+    "version": "0.1.0",
     "description": "Minimalify is a zero-dependency CLI/library for building blazing-fast, static HTML/CSS/JS sites",
-    "license": "ISC",
+    "license": "Apache-2.0",
+    "publisher": "ragarwal06",
     "type": "module",
+    "author": "ragarwalll <agarwal.rahul324@gmail.com>",
     "repository": {
         "type": "git",
         "url": "https://github.com/ragarwalll/minimalify.git"
     },
+    "icon": "logo/logo.png",
     "keywords": [
         "minimalify",
         "cli",
@@ -18,11 +21,15 @@
         "site",
         "generator"
     ],
+    "categories": [
+        "Programming Languages",
+        "Other"
+    ],
     "main": "./dist/index.cjs",
     "module": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "bin": {
-        "minimalify": "./dist/cli.cjs"
+        "minimalify": "./dist/index.js"
     },
     "exports": {
         ".": {
@@ -34,16 +41,19 @@
         "dist"
     ],
     "engines": {
-        "node": ">=14.19"
+        "node": ">=20.0.0"
     },
     "scripts": {
+        "prepare": "husky",
         "start": "NODE_ENV=development node dist/index.js",
         "typecheck": "npm run clean && tsc",
         "build": "tsup",
         "dev": "NODE_ENV=development tsx src/index.ts",
-        "clean": "rm -rf dist .turbo",
+        "clean": "rm -rf dist .minimalify",
+        "test": "",
         "lint": "eslint src/**/*.ts",
         "lint:fix": "npm run lint -- --fix",
+        "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
         "format": "prettier --check \"src/**/*.{cjs,mjs,ts,tsx,md,json}\"",
         "format:fix": "prettier --write \"src/**/*.{cjs,mjs,ts,tsx,md,json}\"",
         "beta": "npm run build && npm publish --tag beta --access public",
@@ -61,9 +71,12 @@
         "@types/node": "^22.15.12",
         "@types/ws": "^8.18.1",
         "@typescript-eslint/eslint-plugin": "^8.32.0",
+        "conventional-changelog-cli": "^5.0.0",
         "eslint": "^9.26.0",
+        "eslint-import-resolver-typescript": "^4.3.4",
         "eslint-plugin-import": "^2.31.0",
         "eslint-plugin-prettier": "^5.4.0",
+        "husky": "^9.1.7",
         "prettier": "^3.5.3",
         "tsup": "^8.4.0",
         "tsx": "^4.19.4",
@@ -106,5 +119,8 @@
         "terser": "^5.39.0",
         "type-fest": "^4.41.0",
         "ws": "^8.18.2"
+    },
+    "optionalDependencies": {
+        "@rollup/rollup-linux-x64-gnu": "4.9.5"
     }
 }

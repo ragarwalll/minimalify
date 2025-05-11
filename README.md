@@ -1,10 +1,36 @@
 # Minimalify
 
-<img src="./logo.svg" alt="Minimalify Logo" width="100" />
+<img src="./logo/logo-dark.png" alt="Minimalify Logo" width="100" />
 
-[![npm version](https://img.shields.io/npm/v/minimalify.svg)](https://www.npmjs.com/package/minimalify) [![License: Apache](https://img.shields.io/badge/License-Apache-blue.svg)](LICENSE)
+<br />
+
+[![npm version](https://img.shields.io/npm/v/minimalify.svg)](https://www.npmjs.com/package/minimalify)
+[![download](https://img.shields.io/npm/dw/minimalify.svg)](https://www.npmjs.com/package/minimalify)
+[![License: Apache](https://img.shields.io/badge/License-Apache-blue.svg)](LICENSE)
 
 Minimalify is a zero-dependency CLI/library for building blazing-fast, static HTML/CSS/JS sites with reusable components. Drop in your source, define a tiny config, run `minimalify build`, and get a fully inlined, minified `build/` folder ready for GitHub Pages or any static host.
+
+## ⏛ Usage
+
+```
+minimalify [options] [command]
+
+Minimalify is a zero-dependency CLI/library for building blazing-fast, static HTML/CSS/JS sites
+
+Options:
+  -V, --version    output the version number
+  -v, --verbose    Enable verbose logging (default: false)
+  -j, --json       Output in JSON format (default: false)
+  -h, --help       display help for command
+
+Commands:
+  init [options]   Initialize the minimalify.config.js file.
+  build [options]  Build the project using the minimalify.config.js file
+  dev [options]    Launch the project using the minimalify.config.js file and watch for changes.
+  help [command]   display help for command
+
+ Generate awesome static site with @minimalify. Contribute at https://github.com/ragarwalll/minimalify.git
+```
 
 ## 🚀 Features
 

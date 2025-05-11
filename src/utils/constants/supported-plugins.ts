@@ -4,7 +4,6 @@ export const plugins = [
     'accessibility',
     'seo',
     'sitemap',
-    'lint',
     'version-assets',
     'custom-domain',
     'markdown',

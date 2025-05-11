@@ -4,7 +4,6 @@
 node_modules/
 /.pnp
 .pnp.js
-package-lock.json
 yarn.lock
 
 # TESTING
@@ -55,4 +54,3 @@ testing
 minimalify.config.js
 draft.ts
 .minimalify
-!docs/package-lock.json
