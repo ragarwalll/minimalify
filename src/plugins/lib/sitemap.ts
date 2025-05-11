@@ -1,0 +1,46 @@
+import fs from 'fs';
+import path from 'path';
+import fg from 'fast-glob';
+import { type MinimalifyPlugin } from '../typings.js';
+import { logger } from '@/utils/logger.js';
+import chalk from 'chalk';
+
+/**
+ * sitemap plugin
+ *
+ * After the site is built, generates sitemap.xml in the outDir.
+ */
+export const sitemap: MinimalifyPlugin = {
+    name: 'sitemap',
+
+    async onPostBuild(cfg) {
+        logger.debug(`${this.name}-plugin: generating sitemap.xml`);
+
+        const pages = await fg('**/*.html', {
+            cwd: cfg.outDir,
+            onlyFiles: true,
+        });
+
+        logger.debug(`${this.name}-plugin: found ${pages.length} HTML pages`);
+
+        const domain = cfg.seo?.siteUrl?.replace(/\/$/, '') || '';
+        const urls = pages.map((rel) => {
+            const loc = domain ? `${domain}/${rel}` : rel;
+            return `  <url><loc>${loc}</loc></url>`;
+        });
+
+        const xml = [
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+            ...urls,
+            '</urlset>',
+        ].join('\n');
+
+        const dest = path.join(cfg.outDir, 'sitemap.xml');
+        fs.writeFileSync(dest, xml, 'utf8');
+
+        logger.info(
+            `${this.name}-plugin: sitemap.xml generated → ${chalk.underline(path.relative(process.cwd(), dest))}`,
+        );
+    },
+};

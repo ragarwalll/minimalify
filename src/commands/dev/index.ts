@@ -1,0 +1,210 @@
+import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import chokidar, { type FSWatcher } from 'chokidar';
+import debounce from 'lodash.debounce';
+import { WebSocketServer } from 'ws';
+import { parseCfg } from '@/utils/config.js';
+import { Builder } from '../builder/build.js';
+import { logger } from '@/utils/logger.js';
+import { CSS_BUNDLE_NAME } from '@/utils/constants/bundle.js';
+import chalk from 'chalk';
+import { type Server, type IncomingMessage, type ServerResponse } from 'http';
+
+let server: Server<typeof IncomingMessage, typeof ServerResponse>;
+let wss: WebSocketServer;
+let watcher: FSWatcher;
+
+const shutdown = () => {
+    logger.warn('Shutting down server...');
+
+    watcher?.close();
+
+    wss?.clients?.forEach((client) => client?.close());
+    wss?.close();
+
+    server?.close(() => {
+        logger.warn('Server closed gracefully.');
+    });
+};
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
+process.on('uncaughtException', shutdown);
+process.on('unhandledRejection', shutdown);
+
+const LIVE_SNIPPET = `
+  <script>
+    (function(){
+    const ws = new WebSocket(
+      (location.protocol === 'https:' ? 'wss' : 'ws')
+      + '://' + location.host + '/__hmr'
+    );
+
+    ws.onmessage = async (e) => {
+      const msg = JSON.parse(e.data);
+
+      if (msg.type === 'css-update') {
+        document.querySelectorAll('link[rel=stylesheet]').forEach(link => {
+          if (link.href.includes(msg.path)) {
+            const url = new URL(link.href);
+            url.search = '?t=' + Date.now();
+            link.href = url;
+          }
+        });
+        return;
+      }
+
+      if (msg.type === 'reload') {
+        location.reload();
+        return;
+      }
+
+      if (msg.type === 'page-update' && msg.path === location.pathname) {
+        // 1) Parse the incoming full HTML
+        const parser = new DOMParser();
+        const newDoc = parser.parseFromString(msg.content, 'text/html');
+
+        // 2) Dynamically import morphdom
+          const { default: md } = await import(
+            '/_modules/morphdom/dist/morphdom-esm.js'
+          );
+
+        // 3) Morph the <html> of the current document into the new one
+        md(
+          document.documentElement,
+          newDoc.documentElement,
+          {
+            // optional hooks, e.g. to preserve certain elements:
+            onBeforeElUpdated: (fromEl, toEl) => {
+              // e.g. skip <script> tags so they don’t get re-evaluated
+              if (fromEl.tagName === 'SCRIPT') return false;
+              return true;
+            }
+          }
+        );
+      }
+    };
+  })();
+  </script></body>`;
+
+/**
+ * Start the dev server
+ * @param cfgPath path to the config file
+ */
+export const dev = async (cfgPath: string) => {
+    const startTime = performance.now();
+
+    const cfg = await parseCfg(cfgPath);
+    const builder = new Builder(cfg);
+
+    // Initialize the builder
+    await builder.init();
+    await builder.build();
+
+    // Start the server
+    const app = express();
+
+    logger.spinner.update('watching for changes...');
+
+    // expose node_modules under /_modules so imports are same‐origin
+    app.use(
+        '/_modules',
+        express.static(path.resolve(process.cwd(), 'node_modules')),
+    );
+
+    app.get('/index.html', (req, res, next) => {
+        const f = path.join(cfg.outDir, req.path);
+        if (!fs.existsSync(f)) return next();
+        let html = fs.readFileSync(f, 'utf8');
+        html = html.replace(/<\/body>/, LIVE_SNIPPET);
+        res.send(html);
+    });
+
+    app.use(express.static(cfg.outDir));
+    // Watch for changes in the source directory
+    server = app.listen(cfg.dev.port, () => {
+        const endTime = performance.now();
+        const timeTaken = ((endTime - startTime) / 1000).toFixed(2);
+
+        logger.info(
+            `minimalify dev server started on port ${cfg.dev.port} (took ${timeTaken}s)`,
+        );
+        logger.info(
+            `open your browser at ${chalk.bold.underline(`http://localhost:${cfg.dev.port}`)}`,
+        );
+        logger.info('press Ctrl+C to stop the server');
+    });
+
+    // Create the websocket server
+    wss = new WebSocketServer({ noServer: true });
+
+    server.on('upgrade', (req, sock, head) => {
+        if (req.url === '/__hmr') {
+            wss.handleUpgrade(req, sock, head, (ws) =>
+                ws.send(JSON.stringify({ type: 'connected' })),
+            );
+        } else {
+            sock.destroy();
+        }
+    });
+
+    // Debounced, coalesced watch events
+    watcher = chokidar.watch(cfg.srcDir, {
+        ignored: [cfg.outDir, '**/node_modules/**'],
+        ignoreInitial: true,
+        usePolling: false,
+        interval: 100,
+    });
+
+    const onChange = debounce(async (evt: string, fp: string) => {
+        const startTime = performance.now();
+
+        const abs = path.resolve(fp);
+        const rebuilt = await builder.incrementalBuild(abs);
+
+        for (const client of wss.clients) {
+            if (fp.endsWith('.css')) {
+                logger.debug(
+                    `rebuilt css file → ${path.relative(process.cwd(), fp)}`,
+                );
+                client.send(
+                    JSON.stringify({
+                        type: 'css-update',
+                        path: path.join('css', CSS_BUNDLE_NAME),
+                    }),
+                );
+            } else if (fp.endsWith('.js')) {
+                logger.debug(
+                    `rebuilt js file → ${path.relative(process.cwd(), fp)}`,
+                );
+                client.send(JSON.stringify({ type: 'reload' }));
+            } else {
+                for (const url of rebuilt) {
+                    logger.debug(
+                        `rebuilt page → ${path.relative(process.cwd(), url)}`,
+                    );
+                    const file = path.join(cfg.outDir, url);
+                    if (fs.existsSync(file)) {
+                        const content = fs.readFileSync(file, 'utf8');
+                        client.send(
+                            JSON.stringify({
+                                type: 'page-update',
+                                path: url,
+                                content,
+                            }),
+                        );
+                    }
+                }
+            }
+        }
+        const endTime = performance.now();
+        const timeTaken = ((endTime - startTime) / 1000).toFixed(2);
+
+        logger.info(
+            `file changed → ${chalk.underline(path.relative(process.cwd(), fp))} (${evt}) (took ${timeTaken}s)`,
+        );
+    }, 100);
+
+    watcher.on('all', onChange);
+};
