@@ -67,7 +67,7 @@ const LIVE_SNIPPET = `
 
         // 2) Dynamically import morphdom
           const { default: md } = await import(
-            '/_modules/morphdom/dist/morphdom-esm.js'
+            '/_modules/morphdom/morphdom-esm.js'
           );
 
         // 3) Morph the <html> of the current document into the new one
@@ -114,7 +114,7 @@ export const dev = async (cfgPath: string) => {
         express.static(path.resolve(process.cwd(), 'node_modules/morphdom/dist')),
     );
 
-    app.get('/index.html', (req, res, next) => {
+    app.get(/^\/(.+\.html)$/, (req, res, next) => {
         const f = path.join(cfg.outDir, req.path);
         if (!fs.existsSync(f)) return next();
         let html = fs.readFileSync(f, 'utf8');
