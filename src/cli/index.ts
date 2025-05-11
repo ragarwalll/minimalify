@@ -269,8 +269,5 @@ const afterCommand = () => {
 };
 
 const handleError = (e: any) => {
-    logger.error(
-        chalk.red('[minimalify] error occurred while executing command:'),
-        e,
-    );
+    logger.error(chalk.red('error occurred while executing command'), e);
 };

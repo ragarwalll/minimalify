@@ -109,7 +109,7 @@ export class Builder {
         await this.plugins.callHook('onPreConfig', this.cfg);
 
         this.graph = new BuildGraph(this.cfg);
-        console.log(Object.keys(this.templates));
+
         await this.graph.init();
     }
 
