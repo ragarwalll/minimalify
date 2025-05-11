@@ -17,6 +17,10 @@ export const versionAssets: MinimalifyPlugin = {
         const outDir = cfg.outDir;
 
         // Helper to rename & record
+        const escapeForRegex = (str: string): string => {
+            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        };
+
         const processFile = (subdir: string, bundleName: string) => {
             const full = path.join(outDir, subdir, bundleName);
             if (!fs.existsSync(full)) return;
@@ -57,7 +61,7 @@ export const versionAssets: MinimalifyPlugin = {
         for (const htmlPath of htmlFiles) {
             let html = fs.readFileSync(htmlPath, 'utf8');
             for (const [orig, hashed] of Object.entries(manifest)) {
-                const re = new RegExp(orig.replace(/\./g, '\\.'), 'g');
+                const re = new RegExp(escapeForRegex(orig), 'g');
                 html = html.replace(re, hashed);
             }
             fs.writeFileSync(htmlPath, html, 'utf8');
