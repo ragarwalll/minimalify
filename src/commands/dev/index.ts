@@ -108,9 +108,10 @@ export const dev = async (cfgPath: string) => {
     logger.spinner.update('watching for changes...');
 
     // expose node_modules under /_modules so imports are same‐origin
+    // Serve only specific subdirectories or files from node_modules
     app.use(
-        '/_modules',
-        express.static(path.resolve(process.cwd(), 'node_modules')),
+        '/_modules/morphdom',
+        express.static(path.resolve(process.cwd(), 'node_modules/morphdom/dist')),
     );
 
     app.get('/index.html', (req, res, next) => {
