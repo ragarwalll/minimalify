@@ -5,11 +5,11 @@ import chokidar, { type FSWatcher } from 'chokidar';
 import debounce from 'lodash.debounce';
 import { WebSocketServer } from 'ws';
 import { parseCfg } from '@/utils/config.js';
-import { Builder } from '../builder/build.js';
 import { logger } from '@/utils/logger.js';
 import { CSS_BUNDLE_NAME } from '@/utils/constants/bundle.js';
 import chalk from 'chalk';
 import { type Server, type IncomingMessage, type ServerResponse } from 'http';
+import { Builder } from '../builder/build.js';
 
 let server: Server<typeof IncomingMessage, typeof ServerResponse>;
 let wss: WebSocketServer;
@@ -128,7 +128,7 @@ export const dev = async (cfgPath: string) => {
             let html = fs.readFileSync(resolvedPath, 'utf8');
             html = html.replace(/<\/body>/, LIVE_SNIPPET);
             res.send(html);
-        } catch (err) {
+        } catch (_err: unknown) {
             res.status(500).send('Internal Server Error');
         }
     });

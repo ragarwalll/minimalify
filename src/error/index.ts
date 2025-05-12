@@ -3,6 +3,7 @@ import { DirError } from './dir-error.js';
 import { FileError } from './file-error.js';
 import { GraphError } from './graph-error.js';
 import { HTMLError } from './html-error.js';
+import { NotImplementedError } from './not-implemented-error.js';
 import { PluginError } from './plugin-error.js';
 import { ValidationError } from './validation-error.js';
 
@@ -14,6 +15,7 @@ const errorTypes = [
     GraphError,
     HTMLError,
     PluginError,
+    NotImplementedError,
     ValidationError,
 ];
 
@@ -33,6 +35,7 @@ function toKnownError(
     | HTMLError
     | PluginError
     | ValidationError
+    | NotImplementedError
     | null {
     for (const ErrorType of errorTypes) {
         if (error instanceof ErrorType) {
@@ -41,6 +44,7 @@ function toKnownError(
                 | DirError
                 | FileError
                 | GraphError
+                | NotImplementedError
                 | HTMLError
                 | PluginError
                 | ValidationError;

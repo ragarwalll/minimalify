@@ -11,12 +11,21 @@ export class DependencyGraph {
     // resource → set of pages that depend on it
     private dependents: Map<string, Set<string>>;
 
+    /**
+     * Create a new dependency graph.
+     *
+     * The graph is empty at first.
+     */
     constructor() {
         this.dependencies = new Map();
         this.dependents = new Map();
     }
 
-    /** Ensure a node exists in both maps */
+    /**
+     * Ensure that the given node exists in the graph.
+     *
+     * @param node  the node to ensure
+     */
     private ensureNode(node: string): void {
         if (!this.dependencies.has(node))
             this.dependencies.set(node, new Set());
@@ -37,13 +46,12 @@ export class DependencyGraph {
     }
 
     /**
-     * Given a changed node, returns all pages (consumers) that
-     * directly or indirectly depend on it.
+     * Get all nodes that are affected by a change to `changed`.
      *
      * @param changed  the node that changed
-     * @returns        set of affected pages
+     * @returns  set of nodes that are affected by the change
      */
-    getAffectedPages(changed: string): Set<string> {
+    getStaleNodes(changed: string): string[] {
         const affected = new Set<string>();
         const queue: string[] = [];
 
@@ -71,7 +79,7 @@ export class DependencyGraph {
             }
         }
 
-        return affected;
+        return Array.from(affected);
     }
 
     /**
@@ -93,6 +101,16 @@ export class DependencyGraph {
      */
     getDependencies(page: string): Set<string> | undefined {
         return this.dependencies.get(page);
+    }
+
+    /**
+     * Get dependents of a given resource.
+     *
+     * @param resource
+     * @returns  set of pages that depend on the resource
+     */
+    getDependents(resource: string): Set<string> | undefined {
+        return this.dependents.get(resource);
     }
 
     /**

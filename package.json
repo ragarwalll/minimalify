@@ -119,7 +119,8 @@
         "stylelint": "^16.19.1",
         "terser": "^5.39.0",
         "type-fest": "^4.41.0",
-        "ws": "^8.18.2"
+        "ws": "^8.18.2",
+        "xxhash-wasm": "^1.1.0"
     },
     "optionalDependencies": {
         "@rollup/rollup-linux-x64-gnu": "4.9.5"
