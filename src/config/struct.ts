@@ -6,6 +6,7 @@ import { type MinifyOptions } from 'terser';
  */
 interface HTMLConfig {
     minify: boolean;
+    ignore: string[];
 }
 
 /**
@@ -13,7 +14,8 @@ interface HTMLConfig {
  */
 interface JSConfig {
     minify: boolean;
-    terserOptions: MinifyOptions;
+    minifyOptions: MinifyOptions;
+    ignore: string[];
 }
 
 /**
@@ -21,6 +23,7 @@ interface JSConfig {
  */
 interface CSSConfig {
     minify: boolean;
+    ignore: string[];
 }
 
 /**
@@ -30,6 +33,13 @@ interface ImageConfig {
     optimize: boolean;
     outDir: string;
     supportedFormats: string[];
+    ignore: string[];
+}
+
+interface TemplatesConfig {
+    dir: string;
+    sharedUri: string[];
+    ignore: string[];
 }
 
 /**
@@ -57,8 +67,8 @@ export interface MinimalifyConfig {
     // the images config
     images: ImageConfig;
 
-    // templates dir
-    templatesDir: string;
+    // the templates config
+    templates: TemplatesConfig;
 
     // dev options
     dev: {
@@ -86,7 +96,7 @@ export interface MinimalifyConfig {
 // the available directories in the config
 export type AvailableDirectories = Pick<
     MinimalifyConfig,
-    'srcDir' | 'templatesDir'
+    'srcDir' | 'templates'
 >;
 
 // the available directories in the config as array
@@ -97,37 +107,47 @@ export type AvailableDirectoriesArray = Array<keyof AvailableDirectories>;
  * @type {MinimalifyConfig}
  */
 export const defaultConfig: MinimalifyConfig = {
-    srcDir: 'src',
+    srcDir: '.',
     outDir: 'dist',
     sharedDomains: ['https://therahulagarwal.com'],
     html: {
         minify: true,
+        ignore: [],
     },
     css: {
         minify: true,
+        ignore: [],
     },
     js: {
         minify: true,
-        terserOptions: {},
+        minifyOptions: {},
+        ignore: [],
     },
     images: {
-        optimize: false,
+        optimize: true,
         outDir: 'images',
         supportedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
+        ignore: [],
     },
-    templatesDir: 'templates',
+    templates: {
+        dir: 'templates',
+        sharedUri: [],
+        ignore: [],
+    },
     dev: {
         port: 3000,
     },
+    cache: true,
     plugins: [
-        'bundle-analyzer',
-        'image-optimizer',
         'accessibility',
+        'bundle-analyzer',
+        'custom-domain',
+        'image-optimizer',
+        'markdown',
+        'perf-monitor',
         'seo',
         'sitemap',
-        'version-assets',
-        'markdown',
         'spa',
-        'perf-monitor',
+        'version-assets',
     ],
 };

@@ -81,6 +81,12 @@ export class TemplateProcessor extends AssetProcessor {
                 name: nodeName,
                 absPath,
             } as AssetNode);
+        } else if (_eventType === 'addDir') {
+            return Promise.resolve({
+                type: this._nodeType,
+                name: this.formatNodeName(absPath),
+                absPath,
+            } as AssetNode);
         }
         const node: AssetNode = {
             type: this._nodeType,
@@ -295,9 +301,9 @@ export class TemplateProcessor extends AssetProcessor {
         force = false,
     ) {
         if (
-            !this._cfg.templatesDir ||
+            !this._cfg.templates?.dir ||
             !node.absPath.startsWith(
-                path.join(this._cfg.srcDir, this._cfg.templatesDir),
+                path.join(this._cfg.srcDir, this._cfg.templates?.dir),
             )
         ) {
             if (!force) {

@@ -2,6 +2,8 @@ User-agent: *
 Allow: /
 Allow: /images/
 Allow: /favicon/
+Allow: /@*
+Allow: /schema
 
 # Sitemaps
 Sitemap: https://therahulagarwal.com/minimalify/sitemap.xml
@@ -14,7 +16,6 @@ Disallow: /private/
 Disallow: /admin/
 Disallow: /backup/
 Disallow: /temp/
-Disallow: /*.json$
 Disallow: /*.xml$
 Disallow: /*.txt$
 
@@ -25,4 +26,5 @@ Allow: /*.png$
 Allow: /*.jpg$
 Allow: /*.gif$
 Allow: /*.svg$
+Allow: /*.json$
 Allow: /*.ico$

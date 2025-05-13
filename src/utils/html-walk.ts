@@ -6,8 +6,12 @@ type Fn = (node: Element, parent?: Element) => Promise<void> | void;
 interface HandlerDef {
     /** string exact match or regex test against tagName */
     match: string | RegExp;
-    /** functions to call on match */
-    fns: Fn[];
+    /** functions to call on match (legacy hook, runs between pre and post) */
+    fns?: Fn[];
+    /** functions to call before descending into children */
+    pre?: Fn[];
+    /** functions to call after descending into children */
+    post?: Fn[];
     /**
      * Optional override for whether to descend into children.
      * If ANY matched handlerDef has descendChildren,
@@ -22,45 +26,55 @@ interface WalkOptions {
 }
 
 /**
- * Single-pass HTML tree walker. Matches each node against all
- * handlerDefs (string or regex), invokes their fns, then
- * descends according to the AND of any explicit descendChildren flags
- * or the defaultDescend.
+ * Single-pass HTML tree walker with pre/post/legacy hooks.
  */
-export const walkHtmlTree = async (node: Element, options: WalkOptions) => {
+export const walkHtmlTree = async (
+    node: Element,
+    options: WalkOptions,
+): Promise<void> => {
     const { handlers, defaultDescend = true } = options;
     const tag = node.tagName;
 
-    // collect all handlers that match this tag
+    // find all handlers that match this tagName
     const matched = handlers.filter((h) =>
         typeof h.match === 'string' ? tag === h.match : h.match.test(tag),
     );
 
-    // invoke all fns
+    // run all pre-visit hooks
     for (const h of matched) {
-        for (const fn of h.fns) {
+        for (const fn of h.pre ?? []) {
             await fn(node, node.parentNode as Element);
         }
     }
 
-    // determine whether to descend:
-    // if any handlerDef provided descendChildren, AND them all;
-    // otherwise fall back to defaultDescend
-    const explicit = matched
+    // run all legacy fns (original behavior)
+    for (const h of matched) {
+        for (const fn of h.fns ?? []) {
+            await fn(node, node.parentNode as Element);
+        }
+    }
+
+    // decide whether to descend
+    const explicitFlags = matched
         .map((h) => h.descendChildren)
         .filter((d): d is boolean => d !== undefined);
-
     const shouldDescend =
-        explicit.length > 0 ? explicit.every(Boolean) : defaultDescend;
+        explicitFlags.length > 0
+            ? explicitFlags.every(Boolean)
+            : defaultDescend;
 
-    if (!shouldDescend) return;
-
-    // recurse into element‐like children
-    if (node.childNodes) {
+    if (shouldDescend && node.childNodes) {
         for (const child of node.childNodes) {
             if (typeof (child as any).tagName === 'string') {
                 await walkHtmlTree(child as Element, options);
             }
+        }
+    }
+
+    // run all post-visit hooks
+    for (const h of matched) {
+        for (const fn of h.post ?? []) {
+            await fn(node, node.parentNode as Element);
         }
     }
 };

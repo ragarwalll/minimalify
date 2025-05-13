@@ -1,0 +1,229 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "version": "1.0.0",
+    "description": "Minimalify configuration schema",
+    "title": "MinimalifyConfig",
+    "type": "object",
+    "properties": {
+        "srcDir": {
+            "type": "string",
+            "description": "The starting point of the project",
+            "default": "."
+        },
+        "outDir": {
+            "type": "string",
+            "description": "The output directory of the project",
+            "default": "dist"
+        },
+        "sharedDomains": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Processable assets domains",
+            "default": ["https://therahulagarwal.com"]
+        },
+        "html": {
+            "$ref": "#/definitions/HTMLConfig"
+        },
+        "js": {
+            "$ref": "#/definitions/JSConfig"
+        },
+        "css": {
+            "$ref": "#/definitions/CSSConfig"
+        },
+        "images": {
+            "$ref": "#/definitions/ImageConfig"
+        },
+        "templates": {
+            "$ref": "#/definitions/TemplatesConfig"
+        },
+        "dev": {
+            "type": "object",
+            "properties": {
+                "port": {
+                    "type": "integer",
+                    "default": 3000,
+                    "description": "Port number for dev server"
+                }
+            },
+            "additionalProperties": false
+        },
+        "customDomain": {
+            "type": "string",
+            "description": "Optional custom domain",
+            "default": ""
+        },
+        "seo": {
+            "type": "object",
+            "properties": {
+                "siteUrl": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "titleSuffix": {
+                    "type": "string"
+                },
+                "defaultDescription": {
+                    "type": "string"
+                },
+                "twitterCard": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "plugins": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "enum": [
+                    "bundle-analyzer",
+                    "image-optimizer",
+                    "accessibility",
+                    "seo",
+                    "sitemap",
+                    "version-assets",
+                    "custom-domain",
+                    "markdown",
+                    "spa",
+                    "perf-monitor"
+                ]
+            },
+            "minItems": 0,
+            "default": [
+                "bundle-analyzer",
+                "image-optimizer",
+                "accessibility",
+                "sitemap",
+                "version-assets",
+                "custom-domain",
+                "markdown",
+                "spa",
+                "perf-monitor"
+            ],
+            "description": "List of minimalify plugins"
+        },
+        "cache": {
+            "type": "boolean",
+            "description": "Enable or disable cache",
+            "default": true
+        }
+    },
+    "additionalProperties": false,
+    "definitions": {
+        "HTMLConfig": {
+            "type": "object",
+            "properties": {
+                "minify": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "ignore": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": []
+                }
+            },
+            "additionalProperties": false
+        },
+        "JSConfig": {
+            "type": "object",
+            "properties": {
+                "minify": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "minifyOptions": {
+                    "type": "object",
+                    "description": "Options passed to terser; any valid MinifyOptions shape",
+                    "default": {}
+                },
+                "ignore": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": []
+                }
+            },
+            "additionalProperties": false
+        },
+        "CSSConfig": {
+            "type": "object",
+            "properties": {
+                "minify": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "ignore": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": []
+                }
+            },
+            "additionalProperties": false
+        },
+        "ImageConfig": {
+            "type": "object",
+            "properties": {
+                "optimize": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "outDir": {
+                    "type": "string",
+                    "default": "images"
+                },
+                "supportedFormats": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": ["jpg", "jpeg", "png", "gif", "webp", "svg"]
+                },
+                "ignore": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": []
+                }
+            },
+            "additionalProperties": false
+        },
+        "TemplatesConfig": {
+            "type": "object",
+            "properties": {
+                "dir": {
+                    "type": "string",
+                    "default": "templates"
+                },
+                "sharedUri": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": ["https://therahulagarwal.com"]
+                },
+                "ignore": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": []
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}

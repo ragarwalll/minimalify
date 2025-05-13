@@ -114,7 +114,7 @@ export class JsProcessor extends AssetProcessor {
 
         logger.debug(`minifying js bundle using terser`);
         const res = await limit(() =>
-            minify(bundle, this._cfg.js.terserOptions),
+            minify(bundle, this._cfg.js.minifyOptions),
         );
 
         if (res.code === undefined) {

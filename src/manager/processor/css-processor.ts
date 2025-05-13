@@ -113,7 +113,7 @@ export class CSSProcessor extends AssetProcessor {
         const purge = new PurgeCSS();
         const purged = await purge.purge({
             content: (await getAllPages()).map((p) =>
-                path.join(this._cfg.srcDir, p),
+                path.join(this._cfg.outDir, p),
             ),
             css: [{ raw: bundle }],
         });

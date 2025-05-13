@@ -19,7 +19,11 @@ import { CONFIG_FILE_NAME } from './constants/file-name.js';
 export const gatherHtmlPages = async (cfg: MinimalifyConfig) => {
     return await fg(GLOB_HTML, {
         cwd: cfg.srcDir,
-        ignore: [...GLOB_INGORE, `**/${cfg.templatesDir}/**`],
+        ignore: [
+            ...GLOB_INGORE,
+            `**/${cfg.templates?.dir}/**`,
+            ...cfg.html.ignore,
+        ],
         absolute: true,
     });
 };
@@ -32,7 +36,7 @@ export const gatherHtmlPages = async (cfg: MinimalifyConfig) => {
 export const gatherCssFiles = async (cfg: MinimalifyConfig) => {
     return await fg(GLOB_CSS, {
         cwd: cfg.srcDir,
-        ignore: GLOB_INGORE,
+        ignore: [...GLOB_INGORE, ...cfg.css.ignore],
         absolute: true,
     });
 };
@@ -46,7 +50,7 @@ export const gatherCssFiles = async (cfg: MinimalifyConfig) => {
 export const gatherJsFiles = async (cfg: MinimalifyConfig) => {
     return await fg(GLOB_JS, {
         cwd: cfg.srcDir,
-        ignore: [...GLOB_INGORE, CONFIG_FILE_NAME],
+        ignore: [...GLOB_INGORE, CONFIG_FILE_NAME, ...cfg.js.ignore],
         absolute: true,
     });
 };
@@ -61,7 +65,7 @@ export const gatherImgFiles = async (cfg: MinimalifyConfig) => {
         `${GLOB_IMG.replace('{SUPPORTED_IMG_EXTENSIONS}', cfg.images.supportedFormats.join(','))}`,
         {
             cwd: cfg.srcDir,
-            ignore: GLOB_INGORE,
+            ignore: [...GLOB_INGORE, ...cfg.images.ignore],
             absolute: true,
         },
     );
@@ -74,7 +78,7 @@ export const gatherImgFiles = async (cfg: MinimalifyConfig) => {
  */
 export const gatherTemplateFiles = async (cfg: MinimalifyConfig) => {
     return await fg(
-        `${GLOB_TEMPLATES.replace('{TEMPLATE_DIR}', cfg.templatesDir)}`,
+        `${GLOB_TEMPLATES.replace('{TEMPLATE_DIR}', cfg.templates?.dir)}`,
         {
             cwd: cfg.srcDir,
             ignore: GLOB_INGORE,
@@ -91,7 +95,7 @@ export const gatherTemplateFiles = async (cfg: MinimalifyConfig) => {
 export const gatherMdFiles = async (cfg: MinimalifyConfig) => {
     return await fg(`${GLOB_MD}`, {
         cwd: cfg.srcDir,
-        ignore: [...GLOB_INGORE, `**/${cfg.templatesDir}/**`],
+        ignore: [...GLOB_INGORE, `**/${cfg.templates?.dir}/**`],
         absolute: true,
     });
 };

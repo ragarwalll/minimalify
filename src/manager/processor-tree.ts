@@ -145,10 +145,10 @@ export class ProcessorTree {
         absPath: string;
     }) {
         if (
-            cfg.templatesDir !== undefined &&
-            absPath.startsWith(path.join(cfg.srcDir, cfg.templatesDir))
+            cfg.templates?.dir !== undefined &&
+            absPath.startsWith(path.join(cfg.srcDir, cfg.templates?.dir))
         ) {
-            const templateDir = path.join(cfg.srcDir, cfg.templatesDir);
+            const templateDir = path.join(cfg.srcDir, cfg.templates?.dir);
             return {
                 ext: 'tmpl' as NodeType,
                 relPath: path.relative(templateDir, absPath),
