@@ -91,8 +91,9 @@ export abstract class AssetProcessor {
      * @returns the formatted node name
      */
     public formatNodeName(absPath: string): string {
-        if (this._nodeType !== 'tmpl')
+        if (this._nodeType !== 'tmpl') {
             return path.relative(this._cfg.srcDir, absPath);
+        }
 
         // for templates, we need to use the template name
         // take the basename removing the extension

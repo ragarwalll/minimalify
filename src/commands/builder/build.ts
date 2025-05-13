@@ -211,9 +211,11 @@ export class Builder {
             () => Promise.resolve(externalCss),
         );
 
+        const finalCss = externalCss.concat(internalCss);
+
         // 3) minify and return
         const bundle = await this.cssProcessor.minify(
-            internalCss.join('\n'),
+            finalCss.join('\n'),
             this.processor.getAllPages.bind(this.processor),
         );
 
@@ -229,12 +231,16 @@ export class Builder {
             'external',
             _getJs,
         );
+
         const internalJs = await this.jsProcessor.getAssets<string[]>(
             'local',
             () => Promise.resolve(externalJs),
         );
+
+        const finalJs = externalJs.concat(internalJs);
+
         const bundle = await this.jsProcessor.minify(
-            internalJs.join('\n'),
+            finalJs.join('\n'),
             this.processor.getAllPages.bind(this.processor),
         );
 

@@ -10,7 +10,6 @@ const DIST_DIR = (() => {
     // ESM (import.meta.url is defined)
     if (typeof import.meta?.url === 'string') {
         // file://C:/… on Windows comes in with an extra leading slash
-        // @ts-ignore
         const filePath = new URL(import.meta.url).pathname;
 
         // On Windows, pathname starts with "/" before drive letter

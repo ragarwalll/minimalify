@@ -36,7 +36,7 @@ export const markdown: MinimalifyPlugin = {
             const raw = fs.readFileSync(absMd, 'utf8');
 
             // parse front-matter
-            // @ts-ignore
+            // @ts-expect-error front-matter types are not correct
             const { attributes, body } = fm(raw) as {
                 attributes: Record<string, any>;
                 body: string;

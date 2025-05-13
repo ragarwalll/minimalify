@@ -20,3 +20,15 @@ export const parseAttrs = (str: string): Record<string, string> => {
     }
     return out;
 };
+
+/**
+ *
+ * @param base the base URL
+ * @param segment the segment to append
+ * @returns the appended URL
+ */
+export const appendPath = (base: string, segment: string) => {
+    // Ensure base ends with a slash
+    const baseWithSlash = base.endsWith('/') ? base : base + '/';
+    return new URL(segment, baseWithSlash).toString();
+};

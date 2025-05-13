@@ -16,11 +16,16 @@ import {
 import { walkHtmlTree } from '@/utils/html-walk.js';
 import chalk from 'chalk';
 import { preserveHtml } from '@/utils/html.js';
-import { parseAttrs } from '@/utils/other.js';
+import { appendPath, parseAttrs } from '@/utils/other.js';
 import { type EmitterEventType } from '@/utils/types.js';
 
 type Element = DefaultTreeAdapterMap['element'];
 type ElementNode = DefaultTreeAdapterMap['node'];
+
+interface TemplateListing {
+    name: string;
+    isDirectory: boolean;
+}
 
 export class TemplateProcessor extends AssetProcessor {
     _nodeType = 'tmpl' as const;
@@ -30,6 +35,36 @@ export class TemplateProcessor extends AssetProcessor {
 
     async init(ctx: AssetProcessorContext) {
         const absFiles = await gatherTemplateFiles(this._cfg);
+
+        // if the template dir is set, we need to read the listing.json file
+        if (
+            this._cfg.templates?.sharedUri &&
+            this._cfg.templates?.sharedUri.length !== 0
+        ) {
+            for (const uri of this._cfg.templates.sharedUri) {
+                const listings = appendPath(uri, 'listing.json');
+                let listing: string | undefined;
+                try {
+                    listing = await this._cache.fetch(listings);
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                } catch (_e) {
+                    logger.error(
+                        `failed to fetch listing.json from ${listings}`,
+                    );
+                }
+                if (listing) {
+                    const listingData = JSON.parse(
+                        listing,
+                    ) as TemplateListing[];
+                    for (const { isDirectory, name } of listingData) {
+                        if (isDirectory) continue;
+
+                        const url = appendPath(uri, name);
+                        absFiles.push(url);
+                    }
+                }
+            }
+        }
 
         for (const absPath of absFiles) {
             const node = {
@@ -44,7 +79,7 @@ export class TemplateProcessor extends AssetProcessor {
             // calulates the dependencies
             // and adds the node to the graph
             this._tmplNameToAbsPath.set(node.name, absPath);
-            this._parseAndIndex(ctx, node);
+            await this._parseAndIndex(ctx, node);
         }
         await this._expandAll(ctx);
     }
@@ -95,7 +130,7 @@ export class TemplateProcessor extends AssetProcessor {
         };
         ctx.addNode(node);
         this._tmplNameToAbsPath.set(node.name, absPath);
-        this._parseAndIndex(ctx, node, true);
+        await this._parseAndIndex(ctx, node, true);
         await this._expandFrom(ctx, node.name);
         return node;
     }
@@ -259,7 +294,9 @@ export class TemplateProcessor extends AssetProcessor {
             processed.push(name);
 
             // read the template file again
-            const { data } = this._readFile(this._tmplNameToAbsPath.get(name)!);
+            const { data } = await this._readFile(
+                this._tmplNameToAbsPath.get(name)!,
+            );
             this._templates.set(name, data);
 
             // expand the node
@@ -295,16 +332,20 @@ export class TemplateProcessor extends AssetProcessor {
      * @param force whether to force the parsing
      * @returns void
      */
-    private _parseAndIndex(
+    private async _parseAndIndex(
         ctx: AssetProcessorContext,
         node: AssetNode,
         force = false,
     ) {
+        const isSharedUri = this._cfg.templates?.sharedUri?.some((uri) =>
+            node.absPath.startsWith(uri),
+        );
         if (
             !this._cfg.templates?.dir ||
-            !node.absPath.startsWith(
+            (!node.absPath.startsWith(
                 path.join(this._cfg.srcDir, this._cfg.templates?.dir),
-            )
+            ) &&
+                !isSharedUri)
         ) {
             if (!force) {
                 logger.debug(
@@ -315,7 +356,7 @@ export class TemplateProcessor extends AssetProcessor {
         }
 
         // parse the template file
-        const { node: dom, data } = this._readFile(node.absPath);
+        const { node: dom, data } = await this._readFile(node.absPath);
 
         // set the template
         this._templates.set(node.name, data);
@@ -349,10 +390,15 @@ export class TemplateProcessor extends AssetProcessor {
      * @param absPath absolute path to the template file
      * @returns the parsed template file
      */
-    private _readFile(absPath: string) {
+    private async _readFile(absPath: string) {
         const mdHandler = new MarkdownIt();
+        let tmpl = '';
+        if (absPath.startsWith('http') || absPath.startsWith('https')) {
+            tmpl = await this._cache.fetch(absPath);
+        } else {
+            tmpl = fs.readFileSync(absPath, 'utf-8');
+        }
 
-        let tmpl = fs.readFileSync(absPath, 'utf-8');
         if (!tmpl) {
             logger.warn(`template file ${path.basename(absPath)} is empty`);
             return {

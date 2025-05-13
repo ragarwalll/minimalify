@@ -99,7 +99,7 @@ export const isImgValidForProcessing = ({
     const isLocal = !/^https?:\/\//.test(value);
     const isShared =
         cfg.sharedDomains.some((d) => value.startsWith(d)) &&
-        cfg.images.supportedFormats.includes(ext);
+        (cfg.images?.supportedFormats ?? []).includes(ext);
 
     const isValid = (checkLocalUri && isLocal) || (checkRemoteUri && isShared);
     return { isValid, value };
@@ -128,7 +128,7 @@ export const isObjectValidForProcessing = ({
     const isLocal = !/^https?:\/\//.test(value);
     const isShared =
         cfg.sharedDomains.some((d) => value.startsWith(d)) &&
-        cfg.images.supportedFormats.includes(ext);
+        (cfg.images?.supportedFormats ?? []).includes(ext);
 
     const isValid = (checkLocalUri && isLocal) || (checkRemoteUri && isShared);
     return { isValid, value };

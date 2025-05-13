@@ -13,6 +13,7 @@ export const getPackageJSON = () => {
     // for mac
     packageManagerPath = packageManagerPath.replace('file:', '');
 
+    // eslint-disable-next-line import/no-named-as-default-member
     const packageManagerContent = fs.readJSONSync(
         packageManagerPath,
     ) as PackageJson;

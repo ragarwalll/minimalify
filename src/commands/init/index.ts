@@ -14,8 +14,18 @@ import { logger } from '@/utils/logger.js';
  * @param cwd the current working directory
  */
 export const init = async (cwd: string, force: boolean = false) => {
+    const cfg = Object.assign({}, defaultConfig);
+
+    // delete not required properties
+    delete cfg.html?.ignore;
+    delete cfg.css?.ignore;
+    delete cfg.js?.ignore;
+    delete cfg.images?.ignore;
+    delete cfg.templates?.ignore;
+    delete cfg.js?.minifyOptions;
+
     const minimalifyConfig =
-        `module.exports = ${JSON.stringify(defaultConfig, null, 2)}`.trim();
+        `module.exports = ${JSON.stringify(cfg, null, 2)}`.trim();
 
     // overwrite the file if it exists, overwrite it
     if (fs.existsSync(path.join(cwd, CONFIG_FILE_NAME))) {

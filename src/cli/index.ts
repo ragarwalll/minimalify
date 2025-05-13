@@ -265,7 +265,9 @@ const afterCommand = () => {
     console.log(
         `For more information, visit ${chalk.blue.underline('https://therahulagarwal.com/minimalify')}`,
     );
-    console.log(`Happy coding! ${chalk.bold('🚀')}`);
+    console.log(
+        `Made with no ♥️  only boredom, ${chalk.bold('Happy Coding! 🚀')}`,
+    );
 };
 
 const handleError = (e: any) => {

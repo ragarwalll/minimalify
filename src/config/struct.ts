@@ -1,3 +1,4 @@
+import { CSS_BUNDLE_NAME } from '@/utils/constants/bundle.js';
 import { type SupportedPlugins } from '@/utils/constants/supported-plugins.js';
 import { type MinifyOptions } from 'terser';
 
@@ -56,19 +57,19 @@ export interface MinimalifyConfig {
     sharedDomains: string[];
 
     // html minifier options
-    html: HTMLConfig;
+    html: Partial<HTMLConfig>;
 
     // js minifier options
-    js: JSConfig;
+    js: Partial<JSConfig>;
 
     // css minifier options
-    css: CSSConfig;
+    css: Partial<CSSConfig>;
 
     // the images config
-    images: ImageConfig;
+    images: Partial<ImageConfig>;
 
     // the templates config
-    templates: TemplatesConfig;
+    templates: Partial<TemplatesConfig>;
 
     // dev options
     dev: {
@@ -125,7 +126,7 @@ export const defaultConfig: MinimalifyConfig = {
     },
     images: {
         optimize: true,
-        outDir: 'images',
+        outDir: CSS_BUNDLE_NAME,
         supportedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
         ignore: [],
     },

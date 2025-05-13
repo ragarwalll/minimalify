@@ -28,7 +28,18 @@ export const imageOptimizer: MinimalifyPlugin = {
         );
 
         const ext = path.extname(dest).toLowerCase();
-        if (!cfg.images.supportedFormats.includes(ext.substring(1))) return;
+        if (ext === '.svg') return;
+        if (ext === '.webp') return;
+        if (ext === '.avif') return;
+        if (ext === '.gif') return;
+        if (ext === '.ico') return;
+        if (ext === '.bmp') return;
+        if (ext === '.tiff') return;
+        if (ext === '.jfif') return;
+        if (ext === '.jpe') return;
+        if (ext === '.jif') return;
+        if (!(cfg.images.supportedFormats ?? []).includes(ext.substring(1)))
+            return;
 
         try {
             await limit(async () => {

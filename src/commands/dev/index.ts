@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { static as expressStatic } from 'express';
 import fs from 'fs';
 import path from 'path';
-import chokidar, { type FSWatcher } from 'chokidar';
+import { type FSWatcher, watch as chokidarWatch } from 'chokidar';
 import debounce from 'lodash.debounce';
 import { WebSocketServer } from 'ws';
 import { parseCfg } from '@/utils/config.js';
@@ -10,14 +10,14 @@ import { CSS_BUNDLE_NAME } from '@/utils/constants/bundle.js';
 import chalk from 'chalk';
 import { type Server, type IncomingMessage, type ServerResponse } from 'http';
 import { Builder } from '../builder/build.js';
-import { EmitterEventType } from '@/utils/types.js';
+import { type EmitterEventType } from '@/utils/types.js';
 
 let server: Server<typeof IncomingMessage, typeof ServerResponse>;
 let wss: WebSocketServer;
 let watcher: FSWatcher;
 
 const shutdown = () => {
-    logger.warn('Shutting down server...');
+    logger.warn('shutting down server...');
 
     watcher?.close();
 
@@ -112,7 +112,7 @@ export const dev = async (cfgPath: string) => {
     // Serve only specific subdirectories or files from node_modules
     app.use(
         '/_modules/morphdom',
-        express.static(
+        expressStatic(
             path.resolve(process.cwd(), 'node_modules/morphdom/dist'),
         ),
     );
@@ -129,12 +129,13 @@ export const dev = async (cfgPath: string) => {
             let html = fs.readFileSync(resolvedPath, 'utf8');
             html = html.replace(/<\/body>/, LIVE_SNIPPET);
             res.send(html);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (_err: unknown) {
             res.status(500).send('Internal Server Error');
         }
     });
 
-    app.use(express.static(cfg.outDir));
+    app.use(expressStatic(cfg.outDir));
     // Watch for changes in the source directory
     server = app.listen(cfg.dev.port, () => {
         const endTime = performance.now();
@@ -144,7 +145,7 @@ export const dev = async (cfgPath: string) => {
             `minimalify dev server started on port ${cfg.dev.port} (took ${timeTaken}s)`,
         );
         logger.info(
-            `open your browser at ${chalk.bold.underline(`http://localhost:${cfg.dev.port}`)}`,
+            `open your browser at ${chalk.bold.underline(`http://localhost:${cfg.dev.port}/index.html`)}`,
         );
         logger.info('press Ctrl+C to stop the server');
     });
@@ -163,7 +164,7 @@ export const dev = async (cfgPath: string) => {
     });
 
     // Debounced, coalesced watch events
-    watcher = chokidar.watch(cfg.srcDir, {
+    watcher = chokidarWatch(cfg.srcDir, {
         ignored: [cfg.outDir, '**/node_modules/**'],
         ignoreInitial: true,
         usePolling: false,
@@ -171,6 +172,7 @@ export const dev = async (cfgPath: string) => {
     });
 
     const onChange = debounce(async (evt: string, fp: string) => {
+        logger.spinner.update('rebundling...');
         const startTime = performance.now();
 
         const abs = path.resolve(fp);
@@ -220,6 +222,7 @@ export const dev = async (cfgPath: string) => {
         logger.info(
             `file changed → ${chalk.underline(path.relative(process.cwd(), fp))} (${evt}) (took ${timeTaken}s)`,
         );
+        logger.spinner.update(`watching for changes...`);
     }, 100);
 
     watcher.on('all', onChange);

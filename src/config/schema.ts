@@ -1,2 +1,5 @@
 import schema from './schema.json';
-export const MinimalifySchema = schema;
+
+const obj = Object.assign({}, schema);
+delete (obj as { version?: unknown }).version;
+export const MinimalifySchema = obj;

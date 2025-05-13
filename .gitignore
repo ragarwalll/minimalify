@@ -54,3 +54,4 @@ testing
 minimalify.config.js
 draft.ts
 .minimalify
+minimalify-*.tgz

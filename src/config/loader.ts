@@ -8,6 +8,7 @@ import { ValidationError } from '@/error/validation-error.js';
 import { readFile } from '@/utils/file.js';
 import { logger } from '@/utils/logger.js';
 import chalk from 'chalk';
+import { IMG_BUNDLE_DIR } from '@/utils/constants/bundle.js';
 
 /**
  * Load the minimalify config file.
@@ -33,6 +34,12 @@ export const loadConfig = async (cwd: string, filePath: string) => {
 
     // merge the config with the default config
     config = { ...defaultConfig, ...config };
+
+    if (config.srcDir === undefined || config.srcDir === '')
+        config.srcDir = '.';
+
+    if (config.outDir === undefined || config.outDir === '')
+        config.outDir = 'dist';
 
     // validate the directories in the config file
     validateAvailableDir(cwd, config);
@@ -66,6 +73,41 @@ export const loadConfig = async (cwd: string, filePath: string) => {
 
     config.srcDir = path.join(cwd, config.srcDir);
     config.outDir = path.join(cwd, config.outDir);
+
+    if (config.css == undefined) config.css = {};
+    if (config.js == undefined) config.js = {};
+    if (config.html == undefined) config.html = {};
+    if (config.images == undefined) config.images = {};
+    if (config.templates == undefined) config.templates = {};
+    if (config.dev == undefined)
+        config.dev = {
+            port: 3000,
+        };
+
+    if (config.css.ignore == undefined) config.css.ignore = [];
+    if (config.js.ignore == undefined) config.js.ignore = [];
+    if (config.html.ignore == undefined) config.html.ignore = [];
+    if (config.images.ignore == undefined) config.images.ignore = [];
+    if (config.templates.ignore == undefined) config.templates.ignore = [];
+
+    if (config.templates.sharedUri === undefined)
+        config.templates.sharedUri = [];
+
+    if (config.images.outDir === undefined)
+        config.images.outDir = IMG_BUNDLE_DIR;
+
+    if (config.images.supportedFormats === undefined)
+        config.images.supportedFormats = [
+            'jpg',
+            'jpeg',
+            'png',
+            'gif',
+            'webp',
+            'svg',
+        ];
+    if (config.sharedDomains === undefined) config.sharedDomains = [];
+    if (config.customDomain === undefined) config.customDomain = '';
+    if (config.plugins === undefined) config.plugins = [];
 
     logger.debug(
         `using the src directory → ${chalk.bold.underline(config.srcDir)}`,

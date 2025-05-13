@@ -180,14 +180,12 @@ export class PageProcessor extends AssetProcessor {
                     match: MATCH_TEMPLATE_REGEX,
                     post: [
                         async (node, parent) => {
-                            console.log();
                             await this._buildTemplateFragment(
                                 ctx,
                                 node,
                                 parent,
                                 relPage,
                             );
-                            console.log();
                         },
                     ],
                 },

@@ -22,7 +22,7 @@ export const gatherHtmlPages = async (cfg: MinimalifyConfig) => {
         ignore: [
             ...GLOB_INGORE,
             `**/${cfg.templates?.dir}/**`,
-            ...cfg.html.ignore,
+            ...(cfg.html.ignore ?? []),
         ],
         absolute: true,
     });
@@ -36,7 +36,7 @@ export const gatherHtmlPages = async (cfg: MinimalifyConfig) => {
 export const gatherCssFiles = async (cfg: MinimalifyConfig) => {
     return await fg(GLOB_CSS, {
         cwd: cfg.srcDir,
-        ignore: [...GLOB_INGORE, ...cfg.css.ignore],
+        ignore: [...GLOB_INGORE, ...(cfg.css.ignore ?? [])],
         absolute: true,
     });
 };
@@ -50,7 +50,7 @@ export const gatherCssFiles = async (cfg: MinimalifyConfig) => {
 export const gatherJsFiles = async (cfg: MinimalifyConfig) => {
     return await fg(GLOB_JS, {
         cwd: cfg.srcDir,
-        ignore: [...GLOB_INGORE, CONFIG_FILE_NAME, ...cfg.js.ignore],
+        ignore: [...GLOB_INGORE, CONFIG_FILE_NAME, ...(cfg.js.ignore ?? [])],
         absolute: true,
     });
 };
@@ -62,10 +62,10 @@ export const gatherJsFiles = async (cfg: MinimalifyConfig) => {
  */
 export const gatherImgFiles = async (cfg: MinimalifyConfig) => {
     return await fg(
-        `${GLOB_IMG.replace('{SUPPORTED_IMG_EXTENSIONS}', cfg.images.supportedFormats.join(','))}`,
+        `${GLOB_IMG.replace('{SUPPORTED_IMG_EXTENSIONS}', (cfg.images?.supportedFormats ?? []).join(','))}`,
         {
             cwd: cfg.srcDir,
-            ignore: [...GLOB_INGORE, ...cfg.images.ignore],
+            ignore: [...GLOB_INGORE, ...(cfg.images.ignore ?? [])],
             absolute: true,
         },
     );
@@ -78,7 +78,7 @@ export const gatherImgFiles = async (cfg: MinimalifyConfig) => {
  */
 export const gatherTemplateFiles = async (cfg: MinimalifyConfig) => {
     return await fg(
-        `${GLOB_TEMPLATES.replace('{TEMPLATE_DIR}', cfg.templates?.dir)}`,
+        `${GLOB_TEMPLATES.replace('{TEMPLATE_DIR}', cfg.templates?.dir ?? 'templates')}`,
         {
             cwd: cfg.srcDir,
             ignore: GLOB_INGORE,

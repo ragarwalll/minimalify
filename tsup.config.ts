@@ -12,5 +12,8 @@ export default defineConfig({
     sourcemap: true,
     target: 'esnext',
     outDir: 'dist',
+    banner: {
+        js: '#!/usr/bin/env node',
+    },
     onSuccess: isDev ? 'node dist/index.js' : undefined,
 });
