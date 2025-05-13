@@ -1,0 +1,66 @@
+[
+  {
+    "name": "android-chrome-192x192.png",
+    "isDirectory": false
+  },
+  {
+    "name": "android-chrome-512x512.png",
+    "isDirectory": false
+  },
+  {
+    "name": "apple-touch-icon.png",
+    "isDirectory": false
+  },
+  {
+    "name": "browserconfig.xml",
+    "isDirectory": false
+  },
+  {
+    "name": "favicon-1024x1024.png",
+    "isDirectory": false
+  },
+  {
+    "name": "favicon-16x16.png",
+    "isDirectory": false
+  },
+  {
+    "name": "favicon-32x32.png",
+    "isDirectory": false
+  },
+  {
+    "name": "favicon-96x96.png",
+    "isDirectory": false
+  },
+  {
+    "name": "favicon-inactive.svg",
+    "isDirectory": false
+  },
+  {
+    "name": "favicon.ico",
+    "isDirectory": false
+  },
+  {
+    "name": "favicon.svg",
+    "isDirectory": false
+  },
+  {
+    "name": "mstile-150x150.png",
+    "isDirectory": false
+  },
+  {
+    "name": "safari-pinned-tab.png",
+    "isDirectory": false
+  },
+  {
+    "name": "site.webmanifest",
+    "isDirectory": false
+  },
+  {
+    "name": "web-app-manifest-192x192.png",
+    "isDirectory": false
+  },
+  {
+    "name": "web-app-manifest-512x512.png",
+    "isDirectory": false
+  }
+]
