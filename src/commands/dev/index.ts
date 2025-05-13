@@ -10,6 +10,7 @@ import { CSS_BUNDLE_NAME } from '@/utils/constants/bundle.js';
 import chalk from 'chalk';
 import { type Server, type IncomingMessage, type ServerResponse } from 'http';
 import { Builder } from '../builder/build.js';
+import { EmitterEventType } from '@/utils/types.js';
 
 let server: Server<typeof IncomingMessage, typeof ServerResponse>;
 let wss: WebSocketServer;
@@ -173,7 +174,10 @@ export const dev = async (cfgPath: string) => {
         const startTime = performance.now();
 
         const abs = path.resolve(fp);
-        const rebuilt = await builder.incrementalBuild(abs);
+        const rebuilt = await builder.incrementalBuild(
+            abs,
+            evt as EmitterEventType,
+        );
 
         for (const client of wss.clients) {
             if (fp.endsWith('.css')) {

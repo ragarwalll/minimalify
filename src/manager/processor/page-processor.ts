@@ -36,6 +36,7 @@ import {
 import { preserveHtml } from '@/utils/html.js';
 import { HTMLError } from '@/error/html-error.js';
 import { CSS_BUNDLE_NAME, JS_BUNDLE_NAME } from '@/utils/constants/bundle.js';
+import { type EmitterEventType } from '@/utils/types.js';
 
 const _lruCache = new LRUCache<string, string>({ max: 100 });
 type Element = DefaultTreeAdapterMap['element'];
@@ -80,93 +81,17 @@ export class PageProcessor extends AssetProcessor {
             return Promise.resolve({} as T);
         }
 
-        const externalCssUri = new Set<string>();
-        const externalJsUri = new Set<string>();
-        const externalImgUri = new Set<string>();
-
-        for (const page of pages) {
-            const rawHtml = fs.readFileSync(
-                path.join(this._cfg.srcDir, page),
-                'utf8',
-            );
-
-            const doc = parseFragment(
-                rawHtml,
-            ) as unknown as DefaultTreeAdapterMap['element'];
-
-            await walkHtmlTree(doc, {
-                defaultDescend: true,
-                handlers: [
-                    {
-                        match: 'link',
-                        fns: [
-                            (node) => {
-                                const { isValid, value } =
-                                    isCssValidForProcessing({
-                                        node,
-                                        cfg: this._cfg,
-                                        checkLocalUri: false,
-                                    });
-                                if (isValid) externalCssUri.add(value);
-                            },
-                        ],
-                    },
-                    {
-                        match: 'script',
-                        fns: [
-                            (node) => {
-                                const { isValid, value } =
-                                    isJsValidForProcessing({
-                                        node,
-                                        cfg: this._cfg,
-                                        checkLocalUri: false,
-                                    });
-                                if (isValid) externalJsUri.add(value);
-                            },
-                        ],
-                    },
-                    {
-                        match: 'img',
-                        fns: [
-                            (node) => {
-                                const { isValid, value } =
-                                    isImgValidForProcessing({
-                                        node,
-                                        cfg: this._cfg,
-                                        checkLocalUri: false,
-                                    });
-                                if (isValid) externalImgUri.add(value);
-                            },
-                        ],
-                    },
-                    {
-                        match: 'object',
-                        fns: [
-                            (node) => {
-                                const { isValid, value } =
-                                    isObjectValidForProcessing({
-                                        node,
-                                        cfg: this._cfg,
-                                        checkLocalUri: false,
-                                    });
-                                if (isValid) externalImgUri.add(value);
-                            },
-                        ],
-                    },
-                ],
-            });
-        }
-
         return {
-            cssUris: Array.from(externalCssUri),
-            jsUris: Array.from(externalJsUri),
-            imgUris: Array.from(externalImgUri),
+            cssUris: Array.from(this.externalCssUri),
+            jsUris: Array.from(this.externalJsUri),
+            imgUris: Array.from(this.externalImgUri),
         } as T;
     }
 
-    override addAssetNode(
+    override patchNode(
         _ctx: AssetProcessorContext,
         absPath: string,
+        _eventType: EmitterEventType,
     ): Promise<AssetNode> {
         return Promise.resolve({
             type: this._nodeType,

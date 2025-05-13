@@ -14,6 +14,7 @@ import { fingerprint } from '@/utils/hasher.js';
 import { logger } from '@/utils/logger.js';
 // eslint-disable-next-line import/default
 import pkg from 'bloom-filters';
+import { type EmitterEventType } from '@/utils/types.js';
 
 // Bloom filter for URLs
 const { BloomFilter } = pkg;
@@ -38,10 +39,12 @@ export class ImagesProcessor extends AssetProcessor {
         }
     }
 
-    override addAssetNode(
+    override patchNode(
         _ctx: AssetProcessorContext,
         absPath: string,
+        _eventType: EmitterEventType,
     ): Promise<AssetNode> {
+        logger.debug(`patching node ${absPath} with event type ${_eventType}`);
         return Promise.resolve({
             type: this._nodeType,
             name: this.formatNodeName(absPath),
@@ -69,37 +72,41 @@ export class ImagesProcessor extends AssetProcessor {
         cleanDir(outDir);
 
         // 2. Download & load shared assets & call the hook
-        await Promise.all(
-            assetsUri.map((uri) =>
-                limit(async () => {
-                    if (urlBloom.has(uri)) {
-                        logger.debug(
-                            `skipping asset ${uri} as it is already processed`,
+        if (joinedImgUri !== undefined && joinedImgUri !== '')
+            await Promise.all(
+                assetsUri.map((uri) =>
+                    limit(async () => {
+                        if (urlBloom.has(uri)) {
+                            logger.debug(
+                                `skipping asset ${uri} as it is already processed`,
+                            );
+                            return;
+                        }
+                        urlBloom.add(uri);
+
+                        const data = await this._cache.fetch(uri);
+
+                        const hex = await fingerprint(uri);
+
+                        const dst = path.join(
+                            outDir,
+                            `${hex}${path.extname(uri)}`,
                         );
-                        return;
-                    }
-                    urlBloom.add(uri);
+                        logger.debug(`copying asset to disk → ${dst}`);
 
-                    const data = await this._cache.fetch(uri);
+                        ensureDir(path.dirname(dst));
+                        fs.writeFileSync(dst, data);
 
-                    const hex = await fingerprint(uri);
-
-                    const dst = path.join(outDir, `${hex}${path.extname(uri)}`);
-                    logger.debug(`copying asset to disk → ${dst}`);
-
-                    ensureDir(path.dirname(dst));
-                    fs.writeFileSync(dst, data);
-
-                    await this._pluginManager.callHook(
-                        'onAsset',
-                        this._cfg,
-                        'image',
-                        data,
-                        dst,
-                    );
-                }),
-            ),
-        );
+                        await this._pluginManager.callHook(
+                            'onAsset',
+                            this._cfg,
+                            'image',
+                            data,
+                            dst,
+                        );
+                    }),
+                ),
+            );
 
         // 3. Gather local assets
         let localAssetsUri = await gatherLocalAsstesUri(this._cfg, 'img');

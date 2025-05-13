@@ -17,4 +17,5 @@ export const GLOB_INGORE = [
     '**/out/**',
     '**/coverage/**',
     '**/logs/**',
+    'README.md',
 ];

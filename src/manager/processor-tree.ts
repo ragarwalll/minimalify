@@ -8,6 +8,7 @@ import {
 } from './processor/processor.js';
 import { logger } from '@/utils/logger.js';
 import path from 'path';
+import { type EmitterEventType } from '@/utils/types.js';
 
 /**
  * BuildGraph builds a DAG of dependencies:
@@ -19,6 +20,9 @@ export class ProcessorTree {
 
     // stores the node names for each node
     private absPathToNode = new Map<string, AssetNode>();
+
+    // stores the node names for each node
+    private assetNameToNode = new Map<string, AssetNode>();
 
     // minimalify config object
     private config: MinimalifyConfig;
@@ -35,7 +39,9 @@ export class ProcessorTree {
             }
 
             // add the node to the graph
-            this.absPathToNode.set(absPath, { name, type, absPath });
+            const node = { name, type, absPath };
+            this.absPathToNode.set(absPath, node);
+            this.assetNameToNode.set(name, node);
             logger.debug(`added node ${name} of type ${type}`);
         },
 
@@ -52,9 +58,7 @@ export class ProcessorTree {
         },
 
         getNodeByName: (name) => {
-            return Array.from(this.absPathToNode.values()).find(
-                (node) => node.name === name,
-            );
+            return this.assetNameToNode.get(name);
         },
 
         getNodeByAbsPath: (absPath) => {
@@ -109,15 +113,10 @@ export class ProcessorTree {
     /**
      * Get a node or create a new one if it doesn't exist.
      * @param filePath the absolute path of the file
+     * @param eventType the type of the event
      * @returns the node of the file
      */
-    async patchNode(filePath: string) {
-        const node = this.absPathToNode.get(filePath);
-        if (node) {
-            return node;
-        }
-        logger.debug(`node ${filePath} not found, creating new one`);
-
+    async patchNode(filePath: string, eventType: EmitterEventType) {
         const { ext } = ProcessorTree.parseAbsPath({
             cfg: this.config,
             absPath: filePath,
@@ -128,7 +127,7 @@ export class ProcessorTree {
             console.debug(`processor for ${ext} not found while patching`);
             return undefined;
         }
-        return await processor.addAssetNode(this.ctx, filePath);
+        return await processor.patchNode(this.ctx, filePath, eventType);
     }
 
     /**
@@ -145,7 +144,10 @@ export class ProcessorTree {
         cfg: MinimalifyConfig;
         absPath: string;
     }) {
-        if (cfg.templatesDir !== undefined) {
+        if (
+            cfg.templatesDir !== undefined &&
+            absPath.startsWith(path.join(cfg.srcDir, cfg.templatesDir))
+        ) {
             const templateDir = path.join(cfg.srcDir, cfg.templatesDir);
             return {
                 ext: 'tmpl' as NodeType,
@@ -153,10 +155,10 @@ export class ProcessorTree {
             };
         }
 
-        const ext = path.extname(absPath);
+        const ext = path.extname(absPath).substring(1);
         const relPath = path.relative(cfg.srcDir, absPath);
         return {
-            ext: ext as NodeType,
+            ext: ext === 'html' ? 'page' : (ext as NodeType),
             relPath,
         };
     }
@@ -184,7 +186,7 @@ export class ProcessorTree {
     getStaleNodes(nodeName: string, filter: NodeType = 'page') {
         return this.deps
             .getStaleNodes(nodeName)
-            .filter((node) => this.absPathToNode.get(node)?.type === filter);
+            .filter((node) => this.assetNameToNode.get(node)?.type === filter);
     }
 
     /**

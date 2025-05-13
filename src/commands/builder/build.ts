@@ -16,6 +16,7 @@ import { logger } from '@/utils/logger.js';
 import path from 'path';
 import { cleanDir, ensureDir } from '@/utils/dir.js';
 import chalk from 'chalk';
+import { type EmitterEventType } from '@/utils/types.js';
 
 /**
  * Builder class for building the project.
@@ -246,16 +247,77 @@ export class Builder {
      */
     private _buildImgPipeline = async (_getImg: GetPages): Promise<void> => {
         const joinedImg = await _getImg().then((img) => img.join('\n'));
-        return this.jsProcessor.write(joinedImg);
+        return this.imageProcessor.write(joinedImg);
     };
 
     /**
      * Incremental build: given an absolute file path,
      * re‐bundle CSS/JS or rebuild only affected pages
      */
-    async incrementalBuild(absFile: string): Promise<string[]> {
-        const node = this.processor.getNode(absFile);
-        if (!node) return [];
-        return [];
+    async incrementalBuild(
+        absFile: string,
+        eventType: EmitterEventType,
+    ): Promise<string[]> {
+        const node = await this.processor.patchNode(absFile, eventType);
+        if (!node) {
+            logger.warn(`could not process file ${absFile}`);
+            return [];
+        }
+
+        // extract the node type
+        const { type, name } = node;
+
+        if (type === 'css' || type === 'js' || type === 'img') {
+            // TODO: patch node should handle this
+
+            const {
+                cssUris: sharedCssUri,
+                jsUris: sharedJsUri,
+                imgUris: sharedImgUri,
+            } = await this.pageProcessor.getAssets<{
+                cssUris: string[];
+                jsUris: string[];
+                imgUris: string[];
+            }>('external', this.processor.getAllPages.bind(this.processor));
+
+            const _getCss = () => Promise.resolve(sharedCssUri);
+            const _getJs = () => Promise.resolve(sharedJsUri);
+            const _getImg = () => Promise.resolve(sharedImgUri);
+
+            const tasks: Promise<void>[] = [];
+
+            if (type === 'css') {
+                tasks.push(this._buildCssPipeline(_getCss.bind(this)));
+            } else if (type === 'js') {
+                tasks.push(this._buildJsPipeline(_getJs.bind(this)));
+            } else if (type === 'img') {
+                tasks.push(this._buildImgPipeline(_getImg.bind(this)));
+            }
+
+            await Promise.all(tasks);
+
+            return [];
+        }
+
+        // page or template
+        const rels =
+            type === 'page'
+                ? [path.relative(this.cfg.srcDir, absFile)]
+                : this.processor.getStaleNodes(name);
+
+        await Promise.all(
+            rels.map((rel) =>
+                this.pageProcessor.build(
+                    {
+                        ...this.processor.ctx,
+                        getTemplates: this.templateProcessor.getAssets.bind(
+                            this.templateProcessor,
+                        ),
+                    },
+                    rel,
+                ),
+            ),
+        );
+        return rels.map((r) => `/${r}`);
     }
 }

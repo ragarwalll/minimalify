@@ -83,7 +83,7 @@ export const loadConfig = async (cwd: string, filePath: string) => {
  */
 const validateAvailableDir = (cwd: string, config: MinimalifyConfig): void => {
     const availableDirectories = Object.keys(config).filter((key) => {
-        return key === 'srcDir' || key === 'templatesDir';
+        return key === 'srcDir';
     });
 
     for (const dir of availableDirectories) {

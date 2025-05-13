@@ -3,6 +3,7 @@ import { type MinimalifyConfig } from '@/config/struct.js';
 import { type ProcessorTree } from '../processor-tree.js';
 import { type HTTPCache } from '@/cache-manager/http-cache.js';
 import { type MinimalifyPluginManager } from '@/plugins/manager.js';
+import { type EmitterEventType } from '@/utils/types.js';
 
 // Supported node types for the processor tree
 export const supportedNodeTypes = ['css', 'js', 'tmpl', 'page', 'img'] as const;
@@ -44,10 +45,12 @@ export abstract class AssetProcessor {
      * Add an asset node to the processor.
      * @param ctx the context for the asset processor
      * @param absPath the absolute path of the asset
+     * @param eventType the type of the event
      */
-    abstract addAssetNode(
+    abstract patchNode(
         ctx: AssetProcessorContext,
         absPath: string,
+        eventType: EmitterEventType,
     ): Promise<AssetNode>;
 
     abstract getAssets<T>(

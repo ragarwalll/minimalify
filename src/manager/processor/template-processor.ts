@@ -5,6 +5,7 @@ import {
     type AssetProcessorContext,
 } from './processor.js';
 import path from 'path';
+import MarkdownIt from 'markdown-it';
 import fs from 'fs';
 import { logger } from '@/utils/logger.js';
 import { type DefaultTreeAdapterMap, parseFragment, serialize } from 'parse5';
@@ -16,12 +17,14 @@ import { walkHtmlTree } from '@/utils/html-walk.js';
 import chalk from 'chalk';
 import { preserveHtml } from '@/utils/html.js';
 import { parseAttrs } from '@/utils/other.js';
+import { type EmitterEventType } from '@/utils/types.js';
 
 type Element = DefaultTreeAdapterMap['element'];
 type ElementNode = DefaultTreeAdapterMap['node'];
 
 export class TemplateProcessor extends AssetProcessor {
     _nodeType = 'tmpl' as const;
+    private _tmplNameToAbsPath: Map<string, string> = new Map();
     private _inDegree: Map<string, number> = new Map();
     private _templates: Map<string, string> = new Map();
 
@@ -40,19 +43,53 @@ export class TemplateProcessor extends AssetProcessor {
             // does prechecking for the template path
             // calulates the dependencies
             // and adds the node to the graph
+            this._tmplNameToAbsPath.set(node.name, absPath);
             this._parseAndIndex(ctx, node);
         }
         await this._expandAll(ctx);
     }
 
-    override async addAssetNode(ctx: AssetProcessorContext, absPath: string) {
+    override async patchNode(
+        ctx: AssetProcessorContext,
+        absPath: string,
+        _eventType: EmitterEventType,
+    ) {
+        logger.debug(`patching node ${absPath} with event type ${_eventType}`);
+        if (_eventType === 'unlink') {
+            const nodeName = this.formatNodeName(absPath);
+            // 1) Remove from our own maps
+            this._templates.delete(nodeName);
+            this._inDegree.delete(nodeName);
+            this._tmplNameToAbsPath.delete(nodeName);
+
+            // 2) For every template that depended on this one,
+            //    remove the edge and decrement its in-degree
+            const dependents = ctx.getDependents(nodeName);
+            for (const dep of dependents) {
+                // fix up our own in-degree map
+                const old = this._inDegree.get(dep) ?? 0;
+                this._inDegree.set(dep, Math.max(0, old - 1));
+            }
+
+            // 3) Incrementally re-expand the dependents (and downstream)
+            for (const dep of dependents) {
+                this._expandFrom(ctx, dep);
+            }
+
+            return Promise.resolve({
+                type: this._nodeType,
+                name: nodeName,
+                absPath,
+            } as AssetNode);
+        }
         const node: AssetNode = {
             type: this._nodeType,
             name: this.formatNodeName(absPath),
             absPath,
         };
         ctx.addNode(node);
-        this._parseAndIndex(ctx, node);
+        this._tmplNameToAbsPath.set(node.name, absPath);
+        this._parseAndIndex(ctx, node, true);
         await this._expandFrom(ctx, node.name);
         return node;
     }
@@ -215,6 +252,10 @@ export class TemplateProcessor extends AssetProcessor {
             const name = q.shift()!;
             processed.push(name);
 
+            // read the template file again
+            const { data } = this._readFile(this._tmplNameToAbsPath.get(name)!);
+            this._templates.set(name, data);
+
             // expand the node
             await this._expandOne(ctx, name);
             for (const dep of ctx.getDependents(name)) {
@@ -245,16 +286,26 @@ export class TemplateProcessor extends AssetProcessor {
      * Parse and index a template node.
      * @param ctx the context for the asset processor
      * @param node the template node
+     * @param force whether to force the parsing
      * @returns void
      */
-    private _parseAndIndex(ctx: AssetProcessorContext, node: AssetNode) {
+    private _parseAndIndex(
+        ctx: AssetProcessorContext,
+        node: AssetNode,
+        force = false,
+    ) {
         if (
             !this._cfg.templatesDir ||
             !node.absPath.startsWith(
                 path.join(this._cfg.srcDir, this._cfg.templatesDir),
             )
         ) {
-            return;
+            if (!force) {
+                logger.debug(
+                    `skipping template node ${node.absPath} as it is not in the templates directory`,
+                );
+                return;
+            }
         }
 
         // parse the template file
@@ -293,7 +344,9 @@ export class TemplateProcessor extends AssetProcessor {
      * @returns the parsed template file
      */
     private _readFile(absPath: string) {
-        const tmpl = fs.readFileSync(absPath, 'utf-8');
+        const mdHandler = new MarkdownIt();
+
+        let tmpl = fs.readFileSync(absPath, 'utf-8');
         if (!tmpl) {
             logger.warn(`template file ${path.basename(absPath)} is empty`);
             return {
@@ -301,6 +354,8 @@ export class TemplateProcessor extends AssetProcessor {
                 data: '',
             };
         }
+
+        if (absPath.endsWith('.md')) tmpl = mdHandler.render(tmpl);
 
         return {
             node: parseFragment(tmpl) as Element,

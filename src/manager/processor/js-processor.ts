@@ -15,6 +15,7 @@ import { ensureDir } from '@/utils/dir.js';
 import path from 'path';
 import chalk from 'chalk';
 import { JS_BUNDLE_NAME } from '@/utils/constants/bundle.js';
+import { type EmitterEventType } from '@/utils/types.js';
 
 const _lruCache = new LRUCache<string, string>({ max: 100 });
 
@@ -86,10 +87,12 @@ export class JsProcessor extends AssetProcessor {
         return assets as T;
     }
 
-    override addAssetNode(
+    override patchNode(
         _ctx: AssetProcessorContext,
         absPath: string,
+        _eventType: EmitterEventType,
     ): Promise<AssetNode> {
+        logger.debug(`patching node ${absPath} with event type ${_eventType}`);
         return Promise.resolve({
             type: this._nodeType,
             name: this.formatNodeName(absPath),

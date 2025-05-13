@@ -36,7 +36,7 @@ export const markdown: MinimalifyPlugin = {
             const raw = fs.readFileSync(absMd, 'utf8');
 
             // parse front-matter
-            // @ts-ignore
+            // eslint-disable-next-line no-underscore-dangle
             const { attributes, body } = fm(raw) as {
                 attributes: Record<string, any>;
                 body: string;

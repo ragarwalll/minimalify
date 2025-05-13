@@ -18,6 +18,7 @@ import autoprefixer from 'autoprefixer';
 import postcss from 'postcss';
 import chalk from 'chalk';
 import { CSS_BUNDLE_NAME } from '@/utils/constants/bundle.js';
+import { type EmitterEventType } from '@/utils/types.js';
 
 const _lruCache = new LRUCache<string, string>({ max: 100 });
 
@@ -40,10 +41,12 @@ export class CSSProcessor extends AssetProcessor {
         }
     }
 
-    override addAssetNode(
+    override patchNode(
         _ctx: AssetProcessorContext,
         absPath: string,
+        _eventType: EmitterEventType,
     ): Promise<AssetNode> {
+        logger.debug(`patching node ${absPath} with event type ${_eventType}`);
         return Promise.resolve({
             type: this._nodeType,
             name: this.formatNodeName(absPath),
