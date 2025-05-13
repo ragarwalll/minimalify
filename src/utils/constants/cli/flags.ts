@@ -1,4 +1,4 @@
-export const flags = ['config', 'force', 'verbose', 'json'] as const;
+export const flags = ['config', 'force', 'verbose', 'json', 'type'] as const;
 
 type AvailableFlagsType = (typeof flags)[number];
 
@@ -54,11 +54,11 @@ export const availableFlags: AvailableFlagsMap = {
             alt: 'c',
         },
         description:
-            'Specify the config file for the project (default: minimalify.config.js)',
+            'Specify the config file for the project (default: minimalify.config.[js,json])',
         isArgument: false,
         message: 'Path to the config file',
         type: 'input',
-        input: 'minimalify.config.js',
+        input: '',
     } as UserInputMetadataInput,
     force: {
         name: {
@@ -93,4 +93,15 @@ export const availableFlags: AvailableFlagsMap = {
         type: 'confirm',
         confirm: false,
     } as UserInputMetadataConfirm,
+    type: {
+        name: {
+            name: 'type',
+            alt: 't',
+        },
+        description: 'Type of the config file (js or json)',
+        isArgument: false,
+        message: 'Type of the config file (js or json)',
+        type: 'input',
+        input: 'js',
+    } as UserInputMetadataInput,
 };

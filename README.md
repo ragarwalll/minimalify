@@ -79,61 +79,45 @@ my-site/
 
 ```js
 module.exports = {
-    // source & output directories
     srcDir: 'src',
-    outDir: 'build',
-
-    // shared assets to download (auto-scanned if using sharedDomains)
-    sharedDomains: ['https://cdn.mycompany.com/assets'],
-
-    // Image handling
+    outDir: 'dist',
+    sharedDomains: ['https://therahulagarwal.com'],
+    html: {
+        minify: true,
+    },
+    css: {
+        minify: true,
+    },
+    js: {
+        minify: true,
+        minifyOptions: {},
+    },
     images: {
-        supportedFormats: ['png', 'jpg', 'jpeg', 'gif', 'svg'],
-        outDir: 'img',
         optimize: true,
+        outDir: IMG_BUNDLE_DIR,
+        supportedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
+        ignore: [],
     },
-
-    // Reusable component templates
-    templatesDir: 'src/templates',
-
-    // HTML minification options
-    htmlMinify: {
-        collapseWhitespace: true,
-        removeComments: true,
-        removeRedundantAttributes: true,
-        minifyCSS: true,
-        minifyJS: true,
+    templates: {
+        dir: 'templates',
+        sharedUri: [],
     },
-
-    // Development server + HMR
     dev: {
         port: 3000,
     },
-
-    // Plugins (npm packages or local paths)
+    cache: true,
     plugins: [
-        'bundle-analyzer',
-        'image-optimizer',
         'accessibility',
-        'seo',
-        'lint',
-        'sitemap',
-        'version-assets',
+        'bundle-analyzer',
         'custom-domain',
+        'image-optimizer',
         'markdown',
-        'spa',
         'perf-monitor',
-        'robots-txt',
+        'seo',
+        'sitemap',
+        'spa',
+        'version-assets',
     ],
-
-    // Optional extras
-    customDomain: 'www.my-app.com',
-    seo: {
-        titleSuffix: '| My Site',
-        defaultDescription: 'Default page description',
-        twitterCard: 'summary_large_image',
-        siteUrl: 'https://www.my-app.com',
-    },
 };
 ```
 

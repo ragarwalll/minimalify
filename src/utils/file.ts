@@ -1,24 +1,42 @@
 import { FileError } from '@/error/file-error.js';
 import { promises as fs } from 'fs';
+import { createRequire } from 'module';
+import path from 'path';
+import { pathToFileURL } from 'url';
 
-/**
- * Dynamically load a module by path.  Works in both ESM and CJS.
- *
- * @param modulePath - A relative or absolute path, or package specifier
- */
+const requireCJS = createRequire(import.meta.url);
+
 export async function dynamicImport<T = any>(modulePath: string): Promise<T> {
-    // In a CJS build, `require` should be available.
-    // In an ESM build, `require` is undefined and `import()` works.
-    // We also guard against bundlers swallowing the import by adding webpackIgnore.
-    if (typeof require === 'function') {
-        // Note: require is sync, but we wrap in a Promise to unify the API.
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        return Promise.resolve(require(modulePath) as T);
-    } else {
-        // webpackIgnore prevents Webpack from trying to statically analyze this import
-        // so that it truly happens at runtime.
-        // Other bundlers may need their own pragmas.
-        return (await import(/* webpackIgnore: true */ modulePath)) as T;
+    const ext = path.extname(modulePath).toLowerCase();
+
+    // JSON can always be loaded via CJS require
+    if (ext === '.json') {
+        return requireCJS(modulePath) as T;
+    }
+
+    // .cjs → CJS
+    if (ext === '.cjs') {
+        return requireCJS(modulePath) as T;
+    }
+
+    // Try to require (this will throw ERR_REQUIRE_ESM if module is ESM)
+    try {
+        return requireCJS(modulePath) as T;
+    } catch (err: any) {
+        if (err.code === 'ERR_REQUIRE_ESM') {
+            // Handle ESM .js
+            const url = pathToFileURL(modulePath).href;
+            // JSON import assertions only matter if we import JSON via import()
+            if (ext === '.json') {
+                const mod = await import(/* webpackIgnore: true */ url, {
+                    assert: { type: 'json' },
+                });
+                return mod.default as T;
+            }
+            const mod = await import(/* webpackIgnore: true */ url);
+            return (mod.default ?? mod) as T;
+        }
+        throw err;
     }
 }
 

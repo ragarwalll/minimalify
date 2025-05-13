@@ -5,10 +5,14 @@ import { type MinimalifyConfig, defaultConfig } from './struct.js';
 import { DirError } from '@/error/dir-error.js';
 import { MinimalifySchema } from './schema.js';
 import { ValidationError } from '@/error/validation-error.js';
-import { readFile } from '@/utils/file.js';
+import { dynamicImport } from '@/utils/file.js';
 import { logger } from '@/utils/logger.js';
 import chalk from 'chalk';
 import { IMG_BUNDLE_DIR } from '@/utils/constants/bundle.js';
+import {
+    CONFIG_FILE_NAME,
+    CONFIG_FILE_NAME_JSON,
+} from '@/utils/constants/file-name.js';
 
 /**
  * Load the minimalify config file.
@@ -16,23 +20,38 @@ import { IMG_BUNDLE_DIR } from '@/utils/constants/bundle.js';
  * @param filePath the path to the config file
  */
 export const loadConfig = async (cwd: string, filePath: string) => {
+    if (filePath == undefined || filePath === '') {
+        if (fs.existsSync(path.join(cwd, CONFIG_FILE_NAME))) {
+            filePath = CONFIG_FILE_NAME;
+        } else if (fs.existsSync(path.join(cwd, CONFIG_FILE_NAME_JSON))) {
+            filePath = CONFIG_FILE_NAME_JSON;
+        } else {
+            logger.warn(
+                `config file ${chalk.underline(path.relative(cwd, filePath))} does not exist. Using default config.`,
+            );
+            return defaultConfig;
+        }
+    }
+
     // check if the file exists
-    if (!fs.existsSync(filePath)) {
+    if (!fs.existsSync(path.join(cwd, filePath))) {
         logger.warn(
             `config file ${chalk.underline(path.relative(cwd, filePath))} does not exist. Using default config.`,
         );
         return defaultConfig;
     }
 
+    logger.info(
+        `using the config file → ${chalk.bold.underline(path.relative(cwd, filePath))}`,
+    );
+
     // load the config file with cwd as type MinimalifyConfig
-    let config = JSON.parse(
-        (await readFile(path.join(cwd, filePath))).replace(
-            'module.exports = ',
-            '',
-        ),
-    ) as MinimalifyConfig;
+    let config = await dynamicImport<MinimalifyConfig>(
+        path.join(cwd, filePath),
+    );
 
     // merge the config with the default config
+    if ('$schema' in config) delete config.$schema;
     config = { ...defaultConfig, ...config };
 
     if (config.srcDir === undefined || config.srcDir === '')
@@ -108,6 +127,40 @@ export const loadConfig = async (cwd: string, filePath: string) => {
     if (config.sharedDomains === undefined) config.sharedDomains = [];
     if (config.customDomain === undefined) config.customDomain = '';
     if (config.plugins === undefined) config.plugins = [];
+
+    if (
+        config.js.minifyOptions === undefined ||
+        Object.keys(config.js.minifyOptions).length === 0
+    ) {
+        config.js.minifyOptions = {
+            compress: {
+                drop_console: true,
+                drop_debugger: true,
+                collapse_vars: true,
+                reduce_vars: true,
+                join_vars: true,
+                hoist_funs: true,
+                unused: true,
+                passes: 2,
+                dead_code: true,
+                reduce_funcs: true,
+                sequences: true,
+                side_effects: true,
+                toplevel: true,
+                if_return: true,
+                inline: true,
+                comparisons: true,
+                conditionals: true,
+                directives: true,
+                evaluate: true,
+                properties: true,
+            },
+            mangle: true,
+            output: {
+                comments: false,
+            },
+        };
+    }
 
     logger.debug(
         `using the src directory → ${chalk.bold.underline(config.srcDir)}`,

@@ -93,6 +93,11 @@ const copySchema = async () => {
   const outPath = path.join(destDir, outName);
   await fs.writeJSON(outPath, schemaData, { spaces: 2 });
   console.log(`    • schema → schema/${outName}`);
+
+  const outNameLatest = `minimalify@latest.json`;
+  const outPathLatest = path.join(destDir, outNameLatest);
+  await fs.writeJSON(outPathLatest, schemaData, { spaces: 2 });
+  console.log(`    • schema → schema/${outNameLatest}`);
 };
 
 // ——————————————————————————————————————————————————————————————————————————————————

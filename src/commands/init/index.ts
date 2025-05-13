@@ -2,7 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 import { defaultConfig } from '@/config/struct.js';
-import { CONFIG_FILE_NAME } from '@/utils/constants/file-name.js';
+import {
+    CONFIG_FILE_NAME,
+    CONFIG_FILE_NAME_JSON,
+} from '@/utils/constants/file-name.js';
 import { logger } from '@/utils/logger.js';
 
 /**
@@ -13,7 +16,11 @@ import { logger } from '@/utils/logger.js';
  * If the file already exists, it will not be overwritten.
  * @param cwd the current working directory
  */
-export const init = async (cwd: string, force: boolean = false) => {
+export const init = async (
+    cwd: string,
+    force: boolean = false,
+    type: 'js' | 'json',
+) => {
     const cfg = Object.assign({}, defaultConfig);
 
     // delete not required properties
@@ -25,13 +32,32 @@ export const init = async (cwd: string, force: boolean = false) => {
     delete cfg.js?.minifyOptions;
 
     const minimalifyConfig =
-        `module.exports = ${JSON.stringify(cfg, null, 2)}`.trim();
+        type === 'js'
+            ? `module.exports = ${JSON.stringify(cfg, null, 2)}`.trim()
+            : JSON.stringify(
+                  Object.assign(
+                      {
+                          $schema:
+                              'https://therahulagarwal.com/minimalify/schema/minimalify@latest.json',
+                      },
+                      cfg,
+                  ),
+                  null,
+                  2,
+              );
 
     // overwrite the file if it exists, overwrite it
-    if (fs.existsSync(path.join(cwd, CONFIG_FILE_NAME))) {
+    if (
+        fs.existsSync(
+            path.join(
+                cwd,
+                type === 'js' ? CONFIG_FILE_NAME : CONFIG_FILE_NAME_JSON,
+            ),
+        )
+    ) {
         if (!force) {
             logger.error(
-                `Config file ${chalk.underline(CONFIG_FILE_NAME)} already exists. Use --force to overwrite it.`,
+                `Config file ${chalk.underline(path.basename(type === 'js' ? CONFIG_FILE_NAME : CONFIG_FILE_NAME_JSON))} already exists. Use --force to overwrite it.`,
             );
             return;
         }
@@ -39,13 +65,18 @@ export const init = async (cwd: string, force: boolean = false) => {
 
     // create the file
     fs.writeFileSync(
-        path.join(cwd, CONFIG_FILE_NAME),
+        path.join(
+            cwd,
+            type === 'js' ? CONFIG_FILE_NAME : CONFIG_FILE_NAME_JSON,
+        ),
         minimalifyConfig,
         'utf8',
     );
 
     // inform the user
-    logger.info(`creating ${chalk.underline(CONFIG_FILE_NAME)} in ${cwd}`);
+    logger.info(
+        `creating ${chalk.underline(type === 'js' ? CONFIG_FILE_NAME : CONFIG_FILE_NAME_JSON)} in ${cwd}`,
+    );
 
     // insert new line
     logger.info(

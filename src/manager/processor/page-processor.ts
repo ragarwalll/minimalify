@@ -123,7 +123,21 @@ export class PageProcessor extends AssetProcessor {
         }
 
         // 2. Minify the bundle
-        bundle = await limit(() => minifyHtml(bundle));
+        bundle = await limit(() =>
+            minifyHtml(bundle, {
+                removeAttributeQuotes: true,
+                collapseInlineTagWhitespace: true,
+                collapseWhitespace: true,
+                conservativeCollapse: true,
+                html5: true,
+                noNewlinesBeforeTagClose: false,
+                removeComments: true,
+                removeEmptyAttributes: true,
+                removeEmptyElements: true,
+                removeOptionalTags: true,
+                removeRedundantAttributes: true,
+            }),
+        );
 
         // 4. Cache the bundle
         _lruCache.set(hash, bundle);
@@ -163,9 +177,11 @@ export class PageProcessor extends AssetProcessor {
         // 3. Format the HTML page
         const formattedHtml = await this._formatUri(doc, relPath);
 
-        await this.minify(formattedHtml, () => Promise.resolve([]));
-        await this.write(formattedHtml, relPath);
-        return formattedHtml;
+        const bundle = await this.minify(formattedHtml, () =>
+            Promise.resolve([]),
+        );
+        await this.write(bundle, relPath);
+        return bundle;
     }
 
     async _buildFragment(

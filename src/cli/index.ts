@@ -100,13 +100,22 @@ export const _bakeInitCommand = (program: Command) => {
             availableFlags.force.description,
             (availableFlags.force as UserInputMetadataConfirm).confirm,
         )
+        // set type
+        .option(
+            formatOptionInput({
+                ...availableFlags.type.name,
+                extra: '<js|json>',
+            }),
+            availableFlags.type.description,
+            (availableFlags.type as UserInputMetadataInput).input,
+        )
 
         // set build command action
-        .action((options: { force: boolean }) => {
+        .action((options: { force: boolean; type: 'js' | 'json' }) => {
             try {
                 // start the init process
                 beforeCommand(program.opts());
-                init(process.cwd(), options.force);
+                init(process.cwd(), options.force, options.type);
                 afterCommand();
 
                 // exiting the process
@@ -147,20 +156,9 @@ export const _bakeBuildCommand = (program: Command) => {
             // inform user
             beforeCommand(program.opts());
             logger.spinner.start('minimalify build process started');
-            logger.info(
-                `using the config file → ${chalk.bold.underline(options.config)}`,
-            );
 
             // get the config file path
             const configFilePath = options.config;
-
-            // check if the config file path is valid
-            if (!configFilePath) {
-                logger.error(
-                    'invalid config file path, please provide a valid path',
-                );
-                process.exit(1);
-            }
 
             try {
                 const builder = new Builder(await parseCfg(configFilePath));
@@ -218,24 +216,12 @@ export const _bakeDevCommand = (program: Command) => {
                 beforeCommand(program.opts());
 
                 logger.spinner.start('starting the minimalify dev server');
-                logger.info(
-                    `using the config file → ${chalk.bold.underline(options.config)}`,
-                );
 
                 // get the config file path
                 const configFilePath = options.config;
 
-                // check if the config file path is valid
-                if (!configFilePath) {
-                    logger.error(
-                        'invalid config file path, please provide a valid path',
-                    );
-                    process.exit(1);
-                }
-
                 try {
                     process.env.MINIMALIFY_DEV = 'true';
-
                     await dev(configFilePath);
                 } catch (error) {
                     logError(error);

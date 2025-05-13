@@ -17,7 +17,7 @@ let wss: WebSocketServer;
 let watcher: FSWatcher;
 
 const shutdown = () => {
-    logger.warn('shutting down server...');
+    logger.spinner.update('shutting down server...');
 
     watcher?.close();
 
@@ -25,7 +25,7 @@ const shutdown = () => {
     wss?.close();
 
     server?.close(() => {
-        logger.warn('Server closed gracefully.');
+        logger.spinner.succeed('server closed gracefully.');
     });
 };
 

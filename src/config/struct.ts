@@ -1,4 +1,4 @@
-import { CSS_BUNDLE_NAME } from '@/utils/constants/bundle.js';
+import { IMG_BUNDLE_DIR } from '@/utils/constants/bundle.js';
 import { type SupportedPlugins } from '@/utils/constants/supported-plugins.js';
 import { type MinifyOptions } from 'terser';
 
@@ -126,7 +126,7 @@ export const defaultConfig: MinimalifyConfig = {
     },
     images: {
         optimize: true,
-        outDir: CSS_BUNDLE_NAME,
+        outDir: IMG_BUNDLE_DIR,
         supportedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
         ignore: [],
     },
