@@ -134,7 +134,7 @@ export class PageProcessor extends AssetProcessor {
                 removeComments: true,
                 removeEmptyAttributes: true,
                 removeEmptyElements: true,
-                removeOptionalTags: true,
+                removeOptionalTags: false,
                 removeRedundantAttributes: true,
             }),
         );

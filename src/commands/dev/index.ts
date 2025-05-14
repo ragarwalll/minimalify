@@ -37,14 +37,15 @@ process.on('unhandledRejection', shutdown);
 const LIVE_SNIPPET = `
   <script>
     (function(){
+    console.log('HMR: live reload enabled');
     const ws = new WebSocket(
       (location.protocol === 'https:' ? 'wss' : 'ws')
       + '://' + location.host + '/__hmr'
     );
 
     ws.onmessage = async (e) => {
+    console.log('HMR: message received');
       const msg = JSON.parse(e.data);
-
       if (msg.type === 'css-update') {
         document.querySelectorAll('link[rel=stylesheet]').forEach(link => {
           if (link.href.includes(msg.path)) {
