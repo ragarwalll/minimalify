@@ -168,8 +168,14 @@ export class PageProcessor extends AssetProcessor {
         const raw = fs.readFileSync(absPage, 'utf8');
 
         // Parse the HTML page as AST
-        const doc = parse(raw) as unknown as DefaultTreeAdapterMap['element'];
-        await this._pluginManager.callHook('onPage', this._cfg, absPage, doc);
+        let doc = parse(raw) as unknown as DefaultTreeAdapterMap['element'];
+        doc =
+            (await this._pluginManager.callHook(
+                'onPage',
+                this._cfg,
+                absPage,
+                doc,
+            )) || doc;
 
         // 2. Build the HTML page
         await this._buildFragment(ctx, doc, relPath);

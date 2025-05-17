@@ -43,6 +43,65 @@ interface TemplatesConfig {
     ignore: string[];
 }
 
+interface OpenGraphConfig {
+    type: string;
+    site_name: string;
+}
+
+interface TwitterConfig {
+    title: string;
+    description: string;
+    site: string;
+    card: string;
+    image: string;
+    imageAlt: string;
+}
+
+interface RobotsConfig {
+    index: boolean;
+    follow: boolean;
+    allow: string[];
+    disallow: string[];
+    crawlDelay: number;
+    userAgent: string[];
+}
+
+interface AuthorConfig {
+    firstName: string;
+    lastName: string;
+    username: string;
+    email: string;
+    image: string;
+    imageAlt: string;
+    imageType: string;
+    twitter: string;
+    facebook: string;
+    linkedin: string;
+    github: string;
+    instagram: string;
+    youtube: string;
+}
+
+interface SeoConfig {
+    title: string;
+    description: string;
+    keywords: string[];
+    classification: string;
+    url: string;
+    rating: 'General' | 'Mature' | 'Restricted';
+    target: 'all' | 'mobile' | 'desktop';
+    author: Partial<AuthorConfig>;
+    opengraph: Partial<OpenGraphConfig>;
+    twitter: Partial<TwitterConfig>;
+    robots: Partial<RobotsConfig>;
+}
+
+interface FaviconConfig {
+    svgPath: string;
+    themeColor: string;
+    msTileColor: string;
+}
+
 /**
  * MinimalifyConfig is the configuration object for minimalify
  */
@@ -78,14 +137,10 @@ export interface MinimalifyConfig {
 
     customDomain?: string;
 
-    seo?: {
-        siteUrl: string;
-        title: string;
-        description: string;
-        titleSuffix: string;
-        defaultDescription: string;
-        twitterCard: string;
-    };
+    seo?: Partial<SeoConfig>;
+
+    // favicon options
+    favicon?: Partial<FaviconConfig>;
 
     // minimalify plugins
     plugins: SupportedPlugins[];

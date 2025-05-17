@@ -23,7 +23,7 @@ export const sitemap: MinimalifyPlugin = {
 
         logger.debug(`${this.name}-plugin: found ${pages.length} HTML pages`);
 
-        const domain = cfg.seo?.siteUrl?.replace(/\/$/, '') || '';
+        const domain = cfg.seo?.url?.replace(/\/$/, '') || '';
         const urls = pages.map((rel) => {
             const loc = domain ? `${domain}/${rel}` : rel;
             return `  <url><loc>${loc}</loc></url>`;

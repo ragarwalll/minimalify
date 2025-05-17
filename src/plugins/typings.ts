@@ -41,7 +41,9 @@ export interface MinimalifyPlugin {
         cfg: MinimalifyConfig,
         pagePath: string,
         doc: DefaultTreeAdapterMap['element'],
-    ) => Promise<void> | void;
+    ) =>
+        | Promise<DefaultTreeAdapterMap['element']>
+        | DefaultTreeAdapterMap['element'];
 
     /** after HTML is serialized, before minify */
     onPreHtmlMinify?: (

@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "version": "1.0.0",
-    "description": "Minimalify configuration schema",
+    "version": "2.0.0",
+    "description": "Minimalify configuration schema (updated with extended SEO, Sitemap, and Favicon support)",
     "title": "MinimalifyConfig",
     "type": "object",
     "properties": {
@@ -55,46 +55,17 @@
             "default": ""
         },
         "seo": {
-            "type": "object",
-            "properties": {
-                "siteUrl": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "titleSuffix": {
-                    "type": "string"
-                },
-                "defaultDescription": {
-                    "type": "string"
-                },
-                "twitterCard": {
-                    "type": "string"
-                }
-            },
-            "additionalProperties": false
+            "$ref": "#/definitions/SeoConfig"
+        },
+        "favicon": {
+            "$ref": "#/definitions/FaviconConfig"
         },
         "plugins": {
             "type": "array",
             "items": {
-                "type": "string",
-                "enum": [
-                    "bundle-analyzer",
-                    "image-optimizer",
-                    "accessibility",
-                    "seo",
-                    "sitemap",
-                    "version-assets",
-                    "custom-domain",
-                    "markdown",
-                    "spa",
-                    "perf-monitor"
-                ]
+                "type": "string"
             },
+            "description": "List of minimalify plugins",
             "minItems": 0,
             "default": [
                 "bundle-analyzer",
@@ -106,8 +77,7 @@
                 "markdown",
                 "spa",
                 "perf-monitor"
-            ],
-            "description": "List of minimalify plugins"
+            ]
         },
         "cache": {
             "type": "boolean",
@@ -143,7 +113,6 @@
                 },
                 "minifyOptions": {
                     "type": "object",
-                    "description": "Options passed to terser; any valid MinifyOptions shape",
                     "default": {}
                 },
                 "ignore": {
@@ -213,7 +182,7 @@
                     "items": {
                         "type": "string"
                     },
-                    "default": ["https://therahulagarwal.com"]
+                    "default": []
                 },
                 "ignore": {
                     "type": "array",
@@ -221,6 +190,167 @@
                         "type": "string"
                     },
                     "default": []
+                }
+            },
+            "additionalProperties": false
+        },
+        "SeoConfig": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "keywords": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "classification": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "rating": {
+                    "type": "string",
+                    "enum": ["General", "Mature", "Restricted"]
+                },
+                "target": {
+                    "type": "string",
+                    "enum": ["all", "mobile", "desktop"]
+                },
+                "author": {
+                    "type": "object",
+                    "properties": {
+                        "firstName": {
+                            "type": "string"
+                        },
+                        "lastName": {
+                            "type": "string"
+                        },
+                        "username": {
+                            "type": "string"
+                        },
+                        "email": {
+                            "type": "string"
+                        },
+                        "image": {
+                            "type": "string"
+                        },
+                        "imageAlt": {
+                            "type": "string"
+                        },
+                        "imageType": {
+                            "type": "string"
+                        },
+                        "twitter": {
+                            "type": "string"
+                        },
+                        "facebook": {
+                            "type": "string"
+                        },
+                        "linkedin": {
+                            "type": "string"
+                        },
+                        "github": {
+                            "type": "string"
+                        },
+                        "instagram": {
+                            "type": "string"
+                        },
+                        "youtube": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "opengraph": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        },
+                        "site_name": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "twitter": {
+                    "type": "object",
+                    "properties": {
+                        "title": {
+                            "type": "string"
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "site": {
+                            "type": "string"
+                        },
+                        "card": {
+                            "type": "string"
+                        },
+                        "image": {
+                            "type": "string"
+                        },
+                        "imageAlt": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "robots": {
+                    "type": "object",
+                    "properties": {
+                        "index": {
+                            "type": "boolean"
+                        },
+                        "follow": {
+                            "type": "boolean"
+                        },
+                        "allow": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "disallow": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "crawlDelay": {
+                            "type": "number"
+                        },
+                        "userAgent": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "FaviconConfig": {
+            "type": "object",
+            "properties": {
+                "svgPath": {
+                    "type": "string"
+                },
+                "themeColor": {
+                    "type": "string"
+                },
+                "msTileColor": {
+                    "type": "string"
                 }
             },
             "additionalProperties": false

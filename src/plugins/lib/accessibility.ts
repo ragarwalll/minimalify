@@ -50,7 +50,7 @@ export const accessibility: MinimalifyPlugin = {
             logger.debug(
                 `${this.name}-plugin: axe-core script not found at ${scriptFilePath}. Skipping accessibility check.`,
             );
-            return;
+            return _doc;
         }
 
         scriptEl.textContent = fs.readFileSync(scriptFilePath, 'utf8');
@@ -91,5 +91,6 @@ export const accessibility: MinimalifyPlugin = {
         } else {
             logger.debug(`${this.name}-plugin: no violations found`);
         }
+        return _doc;
     },
 };
