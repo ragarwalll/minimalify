@@ -8,7 +8,6 @@ import { ValidationError } from '@/error/validation-error.js';
 import { dynamicImport } from '@/utils/file.js';
 import { logger } from '@/utils/logger.js';
 import chalk from 'chalk';
-import { IMG_BUNDLE_DIR } from '@/utils/constants/bundle.js';
 import {
     CONFIG_FILE_NAME,
     CONFIG_FILE_NAME_JSON,
@@ -111,9 +110,6 @@ export const loadConfig = async (cwd: string, filePath: string) => {
 
     if (config.templates.sharedUri === undefined)
         config.templates.sharedUri = [];
-
-    if (config.images.outDir === undefined)
-        config.images.outDir = IMG_BUNDLE_DIR;
 
     if (config.images.supportedFormats === undefined)
         config.images.supportedFormats = [

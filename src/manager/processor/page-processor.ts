@@ -28,7 +28,6 @@ import { fingerprint } from '@/utils/hasher.js';
 import { limit, parseAttrs } from '@/utils/other.js';
 import chalk from 'chalk';
 import { ensureDir } from '@/utils/dir.js';
-import { formatImageName } from '@/utils/assets-name-formatter.js';
 import {
     MATCH_CHILDREN_REGEX,
     MATCH_TEMPLATE_REGEX,
@@ -282,21 +281,6 @@ export class PageProcessor extends AssetProcessor {
             });
             if (isValid) this.externalImgUri.add(value);
         }
-        {
-            const { isValid, value } = isImgValidForProcessing({
-                node,
-                cfg: this._cfg,
-            });
-            if (isValid && value) {
-                const { filePath } = formatImageName(this._cfg, value, relPage);
-                node.attrs = node.attrs.map((a: any) => {
-                    if (a.name === 'src') {
-                        a.value = filePath;
-                    }
-                    return a;
-                });
-            }
-        }
     }
 
     /**
@@ -332,21 +316,6 @@ export class PageProcessor extends AssetProcessor {
                 checkLocalUri: false,
             });
             if (isValid) this.externalImgUri.add(value);
-        }
-        {
-            const { isValid, value } = isObjectValidForProcessing({
-                node,
-                cfg: this._cfg,
-            });
-            if (isValid && value) {
-                const { filePath } = formatImageName(this._cfg, value, relPage);
-                node.attrs = node.attrs.map((a: any) => {
-                    if (a.name === 'data') {
-                        a.value = filePath;
-                    }
-                    return a;
-                });
-            }
         }
     }
 

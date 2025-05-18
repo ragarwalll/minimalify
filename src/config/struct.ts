@@ -1,4 +1,3 @@
-import { IMG_BUNDLE_DIR } from '@/utils/constants/bundle.js';
 import { type SupportedPlugins } from '@/utils/constants/supported-plugins.js';
 import { type MinifyOptions } from 'terser';
 
@@ -181,7 +180,6 @@ export const defaultConfig: MinimalifyConfig = {
     },
     images: {
         optimize: true,
-        outDir: IMG_BUNDLE_DIR,
         supportedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
         ignore: [],
     },
@@ -189,6 +187,56 @@ export const defaultConfig: MinimalifyConfig = {
         dir: 'templates',
         sharedUri: [],
         ignore: [],
+    },
+    seo: {
+        title: 'Minimalify',
+        description: 'A minimalistic static site generator',
+        keywords: ['minimalify', 'static site generator', 'minimalistic'],
+        classification: 'static site generator',
+        url: 'https://minimalify.dev',
+        rating: 'General',
+        target: 'all',
+        author: {
+            firstName: 'Rahul',
+            lastName: 'Agarwal',
+            username: 'therahulagarwal',
+            email: 'contact@thrahulagarwal.com',
+            image: 'https://therahulagarwal.com/images/banner.jpg',
+            imageAlt: 'Rahul Agarwal',
+            imageType: 'image/jpeg',
+            twitter: 'https://twitter.com/<username>',
+            facebook: 'https://www.facebook.com/<username>',
+            linkedin: 'https://www.linkedin.com/in/<username>',
+            github: 'https://github.com/<username>',
+            instagram: 'https://www.instagram.com/<username>',
+            youtube: 'https://www.youtube.com/<username>',
+        },
+        opengraph: {
+            type: 'website',
+            site_name: 'Minimalify',
+        },
+        twitter: {
+            title: 'Minimalify',
+            description: 'A minimalistic static site generator',
+            site: '@therahulagarwal',
+            card: 'summary_large_image',
+            image: 'https://minimalify.dev/assets/images/thumbnail.png',
+            imageAlt: 'Minimalify',
+        },
+        robots: {
+            index: true,
+            follow: true,
+            allow: [],
+            disallow: [],
+            crawlDelay: 0,
+            userAgent: ['*'],
+        },
+    },
+    customDomain: 'https://therahulagarwal.com',
+    favicon: {
+        svgPath: 'assets/images/favicon.svg',
+        themeColor: '#ffffff',
+        msTileColor: '#ffffff',
     },
     dev: {
         port: 3000,

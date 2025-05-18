@@ -94,7 +94,6 @@ module.exports = {
     },
     images: {
         optimize: true,
-        outDir: IMG_BUNDLE_DIR,
         supportedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
         ignore: [],
     },

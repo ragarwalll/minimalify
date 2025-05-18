@@ -7,8 +7,7 @@ import {
 } from './processor.js';
 import path from 'path';
 import fs from 'fs';
-import { IMG_BUNDLE_DIR } from '@/utils/constants/bundle.js';
-import { cleanDir, ensureDir } from '@/utils/dir.js';
+import { ensureDir } from '@/utils/dir.js';
 import { limit } from '@/utils/other.js';
 import { fingerprint } from '@/utils/hasher.js';
 import { logger } from '@/utils/logger.js';
@@ -67,9 +66,8 @@ export class ImagesProcessor extends AssetProcessor {
         const assetsUri = joinedImgUri.split('\n');
 
         // 1. Clean & ensure the output directory
-        const outDir = path.join(this._cfg.outDir, IMG_BUNDLE_DIR);
+        const outDir = path.join(this._cfg.outDir);
         ensureDir(outDir);
-        cleanDir(outDir);
 
         // 2. Download & load shared assets & call the hook
         if (joinedImgUri !== undefined && joinedImgUri !== '')
