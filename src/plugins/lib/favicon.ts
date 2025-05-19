@@ -6,18 +6,18 @@ import {
     seoAttrCollections,
 } from '@/utils/tag-modifier-merger.js';
 
-export const seo: MinimalifyPlugin = {
-    name: 'seo',
+export const favicon: MinimalifyPlugin = {
+    name: 'favicon',
 
     onPage(cfg, pagePath, doc) {
         logger.debug(
-            `${this.name}-plugin: injecting SEO metadata → ${pagePath}`,
+            `${this.name}-plugin: configuring favicon(s) → ${pagePath}`,
         );
 
-        const seoCfg = cfg.seo;
+        const seoCfg = cfg.favicon;
         if (!seoCfg) {
             logger.debug(
-                `${this.name}-plugin: no SEO config found, skipping injection`,
+                `${this.name}-plugin: no favicon config found, skipping injection`,
             );
             return doc;
         }

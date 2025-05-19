@@ -147,7 +147,7 @@ export class PageProcessor extends AssetProcessor {
     override async write(bundle: string, relPath?: string) {
         if (relPath == undefined) return;
 
-        const dst = path.join(this._cfg.outDir, relPath);
+        const dst = path.join(this._cfg.out_dir, relPath);
         logger.debug(
             `writing HTML page to disk → ${path.relative(process.cwd(), dst)}`,
         );
@@ -163,7 +163,7 @@ export class PageProcessor extends AssetProcessor {
         if (relPath === undefined || relPath.length == 0) return '';
 
         // 1. Read the HTML file
-        const absPage = path.join(this._cfg.srcDir, relPath);
+        const absPage = path.join(this._cfg.src_dir, relPath);
         const raw = fs.readFileSync(absPage, 'utf8');
 
         // Parse the HTML page as AST
@@ -266,9 +266,9 @@ export class PageProcessor extends AssetProcessor {
                 checkRemoteUri: false,
             });
             if (isValid) {
-                const imgRelPath = path.resolve(this._cfg.srcDir, value);
+                const imgRelPath = path.resolve(this._cfg.src_dir, value);
                 if (fs.existsSync(imgRelPath)) {
-                    const imgNode = `img:${path.relative(this._cfg.srcDir, imgRelPath)}`;
+                    const imgNode = `img:${path.relative(this._cfg.src_dir, imgRelPath)}`;
                     ctx.addDependency(relPage, imgNode);
                 }
             }
@@ -302,9 +302,9 @@ export class PageProcessor extends AssetProcessor {
                 checkRemoteUri: false,
             });
             if (isValid) {
-                const objRelPath = path.resolve(this._cfg.srcDir, value);
+                const objRelPath = path.resolve(this._cfg.src_dir, value);
                 if (fs.existsSync(objRelPath)) {
-                    const objNode = `img:${path.relative(this._cfg.srcDir, objRelPath)}`;
+                    const objNode = `img:${path.relative(this._cfg.src_dir, objRelPath)}`;
                     ctx.addDependency(relPage, objNode);
                 }
             }
@@ -346,9 +346,9 @@ export class PageProcessor extends AssetProcessor {
                 checkRemoteUri: false,
             });
             if (isValid) {
-                const absFile = path.resolve(this._cfg.srcDir, value);
+                const absFile = path.resolve(this._cfg.src_dir, value);
                 if (fs.existsSync(absFile)) {
-                    const cssNode = `css:${path.relative(this._cfg.srcDir, absFile)}`;
+                    const cssNode = `css:${path.relative(this._cfg.src_dir, absFile)}`;
                     ctx.addDependency(relPage, cssNode);
                 }
             }
@@ -382,9 +382,9 @@ export class PageProcessor extends AssetProcessor {
                 checkRemoteUri: false,
             });
             if (isValid) {
-                const absFile = path.resolve(this._cfg.srcDir, value);
+                const absFile = path.resolve(this._cfg.src_dir, value);
                 if (fs.existsSync(absFile)) {
-                    const jsNode = `js:${path.relative(this._cfg.srcDir, absFile)}`;
+                    const jsNode = `js:${path.relative(this._cfg.src_dir, absFile)}`;
                     ctx.addDependency(relPage, jsNode);
                 }
             }

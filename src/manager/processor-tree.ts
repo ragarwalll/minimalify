@@ -146,9 +146,9 @@ export class ProcessorTree {
     }) {
         if (
             cfg.templates?.dir !== undefined &&
-            absPath.startsWith(path.join(cfg.srcDir, cfg.templates?.dir))
+            absPath.startsWith(path.join(cfg.src_dir, cfg.templates?.dir))
         ) {
-            const templateDir = path.join(cfg.srcDir, cfg.templates?.dir);
+            const templateDir = path.join(cfg.src_dir, cfg.templates?.dir);
             return {
                 ext: 'tmpl' as NodeType,
                 relPath: path.relative(templateDir, absPath),
@@ -156,7 +156,7 @@ export class ProcessorTree {
         }
 
         const ext = path.extname(absPath).substring(1);
-        const relPath = path.relative(cfg.srcDir, absPath);
+        const relPath = path.relative(cfg.src_dir, absPath);
         return {
             ext: ext === 'html' ? 'page' : (ext as NodeType),
             relPath,

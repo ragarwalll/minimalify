@@ -43,7 +43,7 @@ export class JsProcessor extends AssetProcessor {
         _get: GetPages,
     ): Promise<T> {
         // 1. Clean & ensure the output directory
-        const outDir = path.join(this._cfg.outDir, this._nodeType);
+        const outDir = path.join(this._cfg.out_dir, this._nodeType);
         ensureDir(outDir);
 
         const assets: string[] = [];
@@ -114,7 +114,7 @@ export class JsProcessor extends AssetProcessor {
 
         logger.debug(`minifying js bundle using terser`);
         const res = await limit(() =>
-            minify(bundle, this._cfg.js.minifyOptions),
+            minify(bundle, this._cfg.js.minify_options),
         );
 
         if (res.code === undefined) {
@@ -137,7 +137,7 @@ export class JsProcessor extends AssetProcessor {
                 bundle,
             )) || bundle;
 
-        const outDir = path.join(this._cfg.outDir, this._nodeType);
+        const outDir = path.join(this._cfg.out_dir, this._nodeType);
         ensureDir(outDir);
 
         logger.debug(

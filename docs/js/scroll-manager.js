@@ -1,19 +1,4 @@
 /**
- * Handles the favicon based on the visibility of the page.
- */
-const faviconHandler = () => {
-  const favicon = document.querySelector('link[rel="icon"][sizes="any"]');
-  if (!favicon) {
-    console.warn('Favicon link element not found.');
-    return;
-  }
-  const faviconPath = document.hidden ?
-    './favicon/favicon-inactive.svg' :
-    './favicon/favicon.svg';
-  favicon.setAttribute('href', faviconPath);
-};
-
-/**
  * Optimizes smooth scroll handling.
  * @param {Element} element - The element to scroll to.
  */
@@ -138,8 +123,7 @@ const updateActiveSection = (() => {
 /**
  * Main function to handle all event listeners.
  */
-const main = () => {
-  document.addEventListener('visibilitychange', faviconHandler);
+const scrollManager = () => {
   window.addEventListener('hashchange', hashChangerHandler);
 
   // Handle initial hash on page load
@@ -161,7 +145,7 @@ const main = () => {
 
 // Initialize once DOM is loaded
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', main);
+  document.addEventListener('DOMContentLoaded', scrollManager);
 } else {
-  main();
+  scrollManager();
 }

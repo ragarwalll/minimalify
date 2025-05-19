@@ -19,7 +19,7 @@ export const bundleAnalyzer: MinimalifyPlugin = {
         logger.debug(`${this.name}-plugin: auditing asset → ${type}`);
 
         // Determine output directory: "css" or "js" under outDir
-        const outDir = path.resolve(cfg.outDir, type);
+        const outDir = path.resolve(cfg.out_dir, type);
         if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
 
         const reportFile = path.join(outDir, `${type}-bundle-report.json`);

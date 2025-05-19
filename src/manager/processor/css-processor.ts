@@ -59,7 +59,7 @@ export class CSSProcessor extends AssetProcessor {
         _get: GetPages,
     ): Promise<T> {
         // 1. Clean & ensure the output directory
-        const outDir = path.join(this._cfg.outDir, this._nodeType);
+        const outDir = path.join(this._cfg.out_dir, this._nodeType);
         ensureDir(outDir);
 
         const assets: string[] = [];
@@ -113,7 +113,7 @@ export class CSSProcessor extends AssetProcessor {
         const purge = new PurgeCSS();
         const purged = await purge.purge({
             content: (await getAllPages()).map((p) =>
-                path.join(this._cfg.outDir, p),
+                path.join(this._cfg.out_dir, p),
             ),
             css: [{ raw: bundle }],
         });
@@ -152,7 +152,7 @@ export class CSSProcessor extends AssetProcessor {
                 bundle,
             )) || bundle;
 
-        const outDir = path.join(this._cfg.outDir, this._nodeType);
+        const outDir = path.join(this._cfg.out_dir, this._nodeType);
         ensureDir(outDir);
 
         logger.debug(

@@ -38,10 +38,10 @@ export class TemplateProcessor extends AssetProcessor {
 
         // if the template dir is set, we need to read the listing.json file
         if (
-            this._cfg.templates?.sharedUri &&
-            this._cfg.templates?.sharedUri.length !== 0
+            this._cfg.templates?.shared_uri &&
+            this._cfg.templates?.shared_uri.length !== 0
         ) {
-            for (const uri of this._cfg.templates.sharedUri) {
+            for (const uri of this._cfg.templates.shared_uri) {
                 const listings = appendPath(uri, 'listing.json');
                 let listing: string | undefined;
                 try {
@@ -337,13 +337,13 @@ export class TemplateProcessor extends AssetProcessor {
         node: AssetNode,
         force = false,
     ) {
-        const isSharedUri = this._cfg.templates?.sharedUri?.some((uri) =>
+        const isSharedUri = this._cfg.templates?.shared_uri?.some((uri) =>
             node.absPath.startsWith(uri),
         );
         if (
             !this._cfg.templates?.dir ||
             (!node.absPath.startsWith(
-                path.join(this._cfg.srcDir, this._cfg.templates?.dir),
+                path.join(this._cfg.src_dir, this._cfg.templates?.dir),
             ) &&
                 !isSharedUri)
         ) {

@@ -25,7 +25,7 @@ export const perfMonitor: MinimalifyPlugin = {
     async onPostBuild(cfg) {
         logger.debug(`${this.name}-plugin: collecting performance metrics`);
 
-        const outDir = cfg.outDir;
+        const outDir = cfg.out_dir;
         const pages = await gatherHtmlPages(cfg);
         const cssFiles = await gatherCssFiles(cfg);
         const jsFiles = await gatherJsFiles(cfg);

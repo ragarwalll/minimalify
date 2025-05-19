@@ -38,7 +38,7 @@ export const imageOptimizer: MinimalifyPlugin = {
         if (ext === '.jfif') return;
         if (ext === '.jpe') return;
         if (ext === '.jif') return;
-        if (!(cfg.images.supportedFormats ?? []).includes(ext.substring(1)))
+        if (!(cfg.images.supported_formats ?? []).includes(ext.substring(1)))
             return;
 
         try {

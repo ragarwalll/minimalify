@@ -12,7 +12,7 @@
     text-decoration: none;
     transition: opacity var(--transition-fast);
     color: var(--color-text);
-  font-weight: bold;
+    font-weight: bold;
     font-size: 1.2rem;
 }
 .c-heading-anchor:hover .c-heading-anchor__link,

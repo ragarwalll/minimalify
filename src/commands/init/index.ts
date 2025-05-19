@@ -29,7 +29,7 @@ export const init = async (
     delete cfg.js?.ignore;
     delete cfg.images?.ignore;
     delete cfg.templates?.ignore;
-    delete cfg.js?.minifyOptions;
+    delete cfg.js?.minify_options;
 
     const minimalifyConfig =
         type === 'js'

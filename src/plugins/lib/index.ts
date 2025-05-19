@@ -11,6 +11,7 @@ import { seo } from './seo.js';
 import { sitemap } from './sitemap.js';
 import { versionAssets } from './version-assets.js';
 import { customDomain } from './custom-domain.js';
+import { favicon } from './favicon.js';
 
 export const plugins: Record<SupportedPlugins, MinimalifyPlugin> = {
     accessibility: accessibility,
@@ -23,4 +24,5 @@ export const plugins: Record<SupportedPlugins, MinimalifyPlugin> = {
     seo: seo,
     sitemap: sitemap,
     'version-assets': versionAssets,
+    favicon: favicon,
 };

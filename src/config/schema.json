@@ -20,7 +20,7 @@
             "items": {
                 "type": "string"
             },
-            "description": "Processable assets domains",
+            "description": "Processable assets domains to download the dependent CSS & JS files",
             "default": ["https://therahulagarwal.com"]
         },
         "html": {
@@ -51,7 +51,7 @@
         },
         "customDomain": {
             "type": "string",
-            "description": "Optional custom domain",
+            "description": "Optional custom domain to generate the CNAME records",
             "default": ""
         },
         "seo": {
@@ -92,10 +92,12 @@
             "properties": {
                 "minify": {
                     "type": "boolean",
+                    "description": "Enable or disable HTML minification",
                     "default": true
                 },
                 "ignore": {
                     "type": "array",
+                    "description": "List of HTML files to ignore, relative to srcDir",
                     "items": {
                         "type": "string"
                     },
@@ -109,10 +111,12 @@
             "properties": {
                 "minify": {
                     "type": "boolean",
+                    "description": "Enable or disable JS minification",
                     "default": true
                 },
                 "minifyOptions": {
                     "type": "object",
+                    "description": "Options for JS minification, use the terser options",
                     "default": {}
                 },
                 "ignore": {
@@ -130,10 +134,12 @@
             "properties": {
                 "minify": {
                     "type": "boolean",
+                    "description": "Enable or disable CSS minification",
                     "default": true
                 },
                 "ignore": {
                     "type": "array",
+                    "description": "List of CSS files to ignore, relative to srcDir",
                     "items": {
                         "type": "string"
                     },
@@ -147,14 +153,12 @@
             "properties": {
                 "optimize": {
                     "type": "boolean",
-                    "default": true
-                },
-                "outDir": {
-                    "type": "string",
-                    "default": "images"
+                    "default": true,
+                    "description": "Enable or disable image optimization"
                 },
                 "supportedFormats": {
                     "type": "array",
+                    "description": "List of supported image formats, eg. jpg, png, gif, webp, svg",
                     "items": {
                         "type": "string"
                     },
@@ -162,6 +166,7 @@
                 },
                 "ignore": {
                     "type": "array",
+                    "description": "List of image files to ignore, relative to srcDir",
                     "items": {
                         "type": "string"
                     },
@@ -175,10 +180,12 @@
             "properties": {
                 "dir": {
                     "type": "string",
-                    "default": "templates"
+                    "default": "templates",
+                    "description": "Directory for templates, relative to srcDir"
                 },
                 "sharedUri": {
                     "type": "array",
+                    "description": "List of shared URIs for templates to download",
                     "items": {
                         "type": "string"
                     },
@@ -186,6 +193,7 @@
                 },
                 "ignore": {
                     "type": "array",
+                    "description": "List of files to ignore, relative to srcDir",
                     "items": {
                         "type": "string"
                     },
@@ -198,72 +206,92 @@
             "type": "object",
             "properties": {
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Title of the page, used for SEO"
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Description of the page, used for SEO"
                 },
                 "keywords": {
                     "type": "array",
+                    "description": "List of keywords for SEO",
                     "items": {
                         "type": "string"
                     }
                 },
                 "classification": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Classification of the page, eg. portfolio, blog, etc."
                 },
                 "url": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "URL of the page, eg. https://example.com"
                 },
                 "rating": {
                     "type": "string",
+                    "description": "Rating of the page, eg. General, Mature, Restricted",
                     "enum": ["General", "Mature", "Restricted"]
                 },
                 "target": {
                     "type": "string",
+                    "description": "Target audience for the page, eg. all, mobile, desktop",
                     "enum": ["all", "mobile", "desktop"]
                 },
                 "author": {
                     "type": "object",
                     "properties": {
                         "firstName": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "First name of the user"
                         },
                         "lastName": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Last name of the user"
                         },
                         "username": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Username of the user, eg. GitHub"
                         },
                         "email": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Email of the user"
                         },
                         "image": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "URL of the image of the user"
                         },
                         "imageAlt": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Alternative text for the image of the user"
                         },
                         "imageType": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Type of the image of the user, eg. image/png, image/jpeg"
                         },
                         "twitter": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Twitter username of the user, please use full url"
                         },
                         "facebook": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Facebook username of the user, please use full url"
                         },
                         "linkedin": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "LinkedIn username of the user, please use full url"
                         },
                         "github": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "GitHub username of the user, please use full url"
                         },
                         "instagram": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Instagram username of the user, please use full url"
                         },
                         "youtube": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "YouTube username of the user, please use full url"
                         }
                     },
                     "additionalProperties": false
@@ -272,10 +300,12 @@
                     "type": "object",
                     "properties": {
                         "type": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Type of Open Graph object. eg. article, website, video, etc."
                         },
                         "site_name": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Name of the site, used in Open Graph"
                         }
                     },
                     "additionalProperties": false
@@ -284,22 +314,34 @@
                     "type": "object",
                     "properties": {
                         "title": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Title for Twitter card"
                         },
                         "description": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Description for Twitter card"
                         },
                         "site": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Twitter username of the site"
                         },
                         "card": {
-                            "type": "string"
+                            "type": "string",
+                            "enum": [
+                                "summary",
+                                "summary_large_image",
+                                "app",
+                                "player"
+                            ],
+                            "description": "Type of Twitter card"
                         },
                         "image": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "URL of the image to be displayed in the Twitter card"
                         },
                         "imageAlt": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Alternative text for the image in the Twitter card"
                         }
                     },
                     "additionalProperties": false
@@ -308,28 +350,34 @@
                     "type": "object",
                     "properties": {
                         "index": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "description": "Whether to index the page or not"
                         },
                         "follow": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "description": "Whether to follow the links on the page or not"
                         },
                         "allow": {
                             "type": "array",
+                            "description": "List of paths to allow for crawling",
                             "items": {
                                 "type": "string"
                             }
                         },
                         "disallow": {
                             "type": "array",
+                            "description": "List of paths to disallow for crawling",
                             "items": {
                                 "type": "string"
                             }
                         },
                         "crawlDelay": {
-                            "type": "number"
+                            "type": "number",
+                            "description": "Delay in seconds between requests to the server"
                         },
                         "userAgent": {
                             "type": "array",
+                            "description": "List of user agents to apply the rules to. (Default: all)",
                             "items": {
                                 "type": "string"
                             }
@@ -344,13 +392,24 @@
             "type": "object",
             "properties": {
                 "svgPath": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Path to the SVG file for the favicon"
                 },
                 "themeColor": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Theme color for the favicon. (Note: this will be displaced in the browser tab)"
                 },
                 "msTileColor": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Color for the Windows 8/10 tile. (Note: this will be used for Windows devices)"
+                },
+                "appleTouchIcon": {
+                    "type": "string",
+                    "description": "Path to the Apple touch icon. (Note: this will be used for iOS devices)"
+                },
+                "safariPinnedTabIcon": {
+                    "type": "string",
+                    "description": "Path to the Safari pinned tab icon. (Note: this will be used for Safari)"
                 }
             },
             "additionalProperties": false

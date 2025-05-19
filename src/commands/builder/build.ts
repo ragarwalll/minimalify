@@ -107,14 +107,14 @@ export class Builder {
         }
 
         // 1. Clean the output directory
-        ensureDir(this.cfg.outDir);
-        cleanDir(this.cfg.outDir);
+        ensureDir(this.cfg.out_dir);
+        cleanDir(this.cfg.out_dir);
 
         logger.debug(`calling ${chalk.underline('pre-build')} hook`);
         await this.plugins.callHook('onPreBuild', this.cfg);
 
         logger.debug(
-            `cleaning output directory → ${chalk.underline(path.basename(this.cfg.outDir))}`,
+            `cleaning output directory → ${chalk.underline(path.basename(this.cfg.out_dir))}`,
         );
 
         // 2. Build the HTML pages
@@ -308,7 +308,7 @@ export class Builder {
         // page or template
         const rels =
             type === 'page'
-                ? [path.relative(this.cfg.srcDir, absFile)]
+                ? [path.relative(this.cfg.src_dir, absFile)]
                 : this.processor.getStaleNodes(name);
 
         await Promise.all(

@@ -14,7 +14,7 @@ export const versionAssets: MinimalifyPlugin = {
     async onPostBuild(cfg) {
         logger.debug(`${this.name}-plugin: versioning assets`);
         const manifest: Record<string, string> = {};
-        const outDir = cfg.outDir;
+        const outDir = cfg.out_dir;
 
         // Helper to rename & record
         const escapeForRegex = (str: string): string => {

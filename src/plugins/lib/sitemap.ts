@@ -17,7 +17,7 @@ export const sitemap: MinimalifyPlugin = {
         logger.debug(`${this.name}-plugin: generating sitemap.xml`);
 
         const pages = await fg('**/*.html', {
-            cwd: cfg.outDir,
+            cwd: cfg.out_dir,
             onlyFiles: true,
         });
 
@@ -36,7 +36,7 @@ export const sitemap: MinimalifyPlugin = {
             '</urlset>',
         ].join('\n');
 
-        const dest = path.join(cfg.outDir, 'sitemap.xml');
+        const dest = path.join(cfg.out_dir, 'sitemap.xml');
         fs.writeFileSync(dest, xml, 'utf8');
 
         logger.info(

@@ -32,7 +32,7 @@ export const markdown: MinimalifyPlugin = {
         }
         logger.debug(`${this.name}-plugin: found ${pages.length} .md files`);
         for (const absMd of pages) {
-            const rel = path.relative(cfg.srcDir, absMd);
+            const rel = path.relative(cfg.src_dir, absMd);
             const raw = fs.readFileSync(absMd, 'utf8');
 
             // parse front-matter
@@ -71,7 +71,7 @@ ${htmlBody}
 
             // Write .html in outDir
             const outRel = rel.replace(/\.md$/, '.html');
-            const dst = path.join(cfg.outDir, outRel);
+            const dst = path.join(cfg.out_dir, outRel);
 
             fs.mkdirSync(path.dirname(dst), { recursive: true });
             fs.writeFileSync(dst, htmlPage, 'utf8');

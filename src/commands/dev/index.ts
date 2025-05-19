@@ -120,9 +120,9 @@ export const dev = async (cfgPath: string) => {
 
     app.get(/^\/(.+\.html)$/, (req, res, next) => {
         try {
-            const resolvedPath = path.resolve(cfg.outDir, '.' + req.path); // Normalize the path
-            if (!resolvedPath.startsWith(cfg.outDir)) {
-                // Ensure the path is within cfg.outDir
+            const resolvedPath = path.resolve(cfg.out_dir, '.' + req.path); // Normalize the path
+            if (!resolvedPath.startsWith(cfg.out_dir)) {
+                // Ensure the path is within cfg.out_dir
                 res.status(403).send('Forbidden');
                 return;
             }
@@ -136,7 +136,7 @@ export const dev = async (cfgPath: string) => {
         }
     });
 
-    app.use(expressStatic(cfg.outDir));
+    app.use(expressStatic(cfg.out_dir));
     // Watch for changes in the source directory
     server = app.listen(cfg.dev.port, () => {
         const endTime = performance.now();
@@ -165,8 +165,8 @@ export const dev = async (cfgPath: string) => {
     });
 
     // Debounced, coalesced watch events
-    watcher = chokidarWatch(cfg.srcDir, {
-        ignored: [cfg.outDir, '**/node_modules/**'],
+    watcher = chokidarWatch(cfg.src_dir, {
+        ignored: [cfg.out_dir, '**/node_modules/**'],
         ignoreInitial: true,
         usePolling: false,
         interval: 100,
@@ -203,7 +203,7 @@ export const dev = async (cfgPath: string) => {
                     logger.debug(
                         `rebuilt page → ${path.relative(process.cwd(), url)}`,
                     );
-                    const file = path.join(cfg.outDir, url);
+                    const file = path.join(cfg.out_dir, url);
                     if (fs.existsSync(file)) {
                         const content = fs.readFileSync(file, 'utf8');
                         client.send(

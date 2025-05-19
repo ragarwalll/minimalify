@@ -66,7 +66,7 @@ export class ImagesProcessor extends AssetProcessor {
         const assetsUri = joinedImgUri.split('\n');
 
         // 1. Clean & ensure the output directory
-        const outDir = path.join(this._cfg.outDir);
+        const outDir = path.join(this._cfg.out_dir);
         ensureDir(outDir);
 
         // 2. Download & load shared assets & call the hook
@@ -123,7 +123,7 @@ export class ImagesProcessor extends AssetProcessor {
 
                     const dst = path.join(
                         outDir,
-                        path.relative(this._cfg.srcDir, uri),
+                        path.relative(this._cfg.src_dir, uri),
                     );
                     logger.debug(`copying asset to disk → ${dst}`);
 

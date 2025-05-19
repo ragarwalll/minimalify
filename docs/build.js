@@ -22,9 +22,9 @@ const PATTERNS = {
 
 const SCHEMA_FILE = path.join(__dirname, '..', 'src', 'config', "schema.json");
 
-const DIST = "dist";
+const DIST = 'dist';
 const DIST_PATH = path.resolve(DIST);
-const LIB_DIR = (v) => path.join(DIST, `@v${v}`);
+const LIB_DIR = (v) => path.join(DIST, `@${v}`);
 const version =
   process.argv[2] || fs.readFileSync("VERSION", "utf8").trim();
 
@@ -132,8 +132,11 @@ const buildCSS = async (dest, usePurge) => {
       const rel = path.relative("css", file);
       const outFile = path.join(dest, "css", rel);
       await fs.mkdirp(path.dirname(outFile));
-      await fs.writeFile(outFile, result.css, "utf8");
-      console.log(`    • CSS → ${path.join(path.basename(dest), "css", rel)}`);
+
+      const minifiedFileName = outFile.replace(/\.css$/, ".min.css");
+
+      await fs.writeFile(minifiedFileName, result.css, "utf8");
+      console.log(`    • CSS → ${path.join(path.basename(dest), "css", rel.replace(/\.css$/, ".min.css"))}`);
     })
   );
 };
@@ -275,7 +278,8 @@ const walkAndList = (dir) => {
     console.log("  • Building site JS (min) → js/");
     await buildJS(DIST);
 
-    const libDest = LIB_DIR(version);
+    // Build the versioned library
+    const libDest = LIB_DIR(`v${version}`);
     console.log(`  • Creating library folder ${libDest}`);
     await fs.mkdirp(libDest);
 
@@ -291,8 +295,39 @@ const walkAndList = (dir) => {
     console.log("  • Copying images → @v…/img/");
     await copyImages(libDest);
 
+    // Create @latest by copying v{version}
+    const latestDest = LIB_DIR("latest");
+    await fs.remove(latestDest);
+    await fs.copy(libDest, latestDest);
+    console.log(`  • Copied @v${version} → @latest`);
+
+    // Now package both into dist/dist
+    const packageDir = path.join(DIST, "dist");
+    await fs.remove(packageDir);
+    await fs.mkdirp(packageDir);
+
+    // Copy @v{version} and @latest
+    for (const src of [libDest, latestDest]) {
+      const name = path.basename(src); // "@vX" or "@latest"
+      await fs.copy(src, path.join(packageDir, name));
+      console.log(`    • ${name} → dist/${name}`);
+    }
+
+    // Copy schema into dist/dist/schema
+    const schemaSrc = path.join(DIST, "schema");
+    const schemaDest = path.join(packageDir, "schema");
+    await fs.copy(schemaSrc, schemaDest);
+    console.log("    • schema → dist/schema");
+
+    // Clean up the root dist folder
+    await Promise.all([
+      fs.remove(libDest),
+      fs.remove(latestDest),
+      fs.remove(schemaSrc)
+    ]);
+
     console.log("  • Generating listing.json in all subdirectories…");
-    walkAndList(DIST_PATH);
+    walkAndList(path.join(DIST_PATH, "dist"));
 
     console.log("✅ Build complete!");
   } catch (err) {
@@ -300,3 +335,4 @@ const walkAndList = (dir) => {
     process.exit(1);
   }
 })();
+

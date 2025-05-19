@@ -53,11 +53,11 @@ export const loadConfig = async (cwd: string, filePath: string) => {
     if ('$schema' in config) delete config.$schema;
     config = { ...defaultConfig, ...config };
 
-    if (config.srcDir === undefined || config.srcDir === '')
-        config.srcDir = '.';
+    if (config.src_dir === undefined || config.src_dir === '')
+        config.src_dir = '.';
 
-    if (config.outDir === undefined || config.outDir === '')
-        config.outDir = 'dist';
+    if (config.out_dir === undefined || config.out_dir === '')
+        config.out_dir = 'dist';
 
     // validate the directories in the config file
     validateAvailableDir(cwd, config);
@@ -89,8 +89,8 @@ export const loadConfig = async (cwd: string, filePath: string) => {
         );
     }
 
-    config.srcDir = path.join(cwd, config.srcDir);
-    config.outDir = path.join(cwd, config.outDir);
+    config.src_dir = path.join(cwd, config.src_dir);
+    config.out_dir = path.join(cwd, config.out_dir);
 
     if (config.css == undefined) config.css = {};
     if (config.js == undefined) config.js = {};
@@ -108,11 +108,11 @@ export const loadConfig = async (cwd: string, filePath: string) => {
     if (config.images.ignore == undefined) config.images.ignore = [];
     if (config.templates.ignore == undefined) config.templates.ignore = [];
 
-    if (config.templates.sharedUri === undefined)
-        config.templates.sharedUri = [];
+    if (config.templates.shared_uri === undefined)
+        config.templates.shared_uri = [];
 
-    if (config.images.supportedFormats === undefined)
-        config.images.supportedFormats = [
+    if (config.images.supported_formats === undefined)
+        config.images.supported_formats = [
             'jpg',
             'jpeg',
             'png',
@@ -120,15 +120,15 @@ export const loadConfig = async (cwd: string, filePath: string) => {
             'webp',
             'svg',
         ];
-    if (config.sharedDomains === undefined) config.sharedDomains = [];
-    if (config.customDomain === undefined) config.customDomain = '';
+    if (config.shared_domains === undefined) config.shared_domains = [];
+    if (config.custom_domain === undefined) config.custom_domain = '';
     if (config.plugins === undefined) config.plugins = [];
 
     if (
-        config.js.minifyOptions === undefined ||
-        Object.keys(config.js.minifyOptions).length === 0
+        config.js.minify_options === undefined ||
+        Object.keys(config.js.minify_options).length === 0
     ) {
-        config.js.minifyOptions = {
+        config.js.minify_options = {
             compress: {
                 drop_console: true,
                 drop_debugger: true,
@@ -159,10 +159,10 @@ export const loadConfig = async (cwd: string, filePath: string) => {
     }
 
     logger.debug(
-        `using the src directory → ${chalk.bold.underline(config.srcDir)}`,
+        `using the src directory → ${chalk.bold.underline(config.src_dir)}`,
     );
     logger.debug(
-        `using the out directory → ${chalk.bold.underline(path.relative(cwd, config.outDir))}`,
+        `using the out directory → ${chalk.bold.underline(path.relative(cwd, config.out_dir))}`,
     );
     return config;
 };
@@ -174,7 +174,7 @@ export const loadConfig = async (cwd: string, filePath: string) => {
  */
 const validateAvailableDir = (cwd: string, config: MinimalifyConfig): void => {
     const availableDirectories = Object.keys(config).filter((key) => {
-        return key === 'srcDir';
+        return key === 'src_dir';
     });
 
     for (const dir of availableDirectories) {
@@ -182,7 +182,7 @@ const validateAvailableDir = (cwd: string, config: MinimalifyConfig): void => {
 
         // check if the directory exists
         if (!fs.existsSync(dirPath)) {
-            if (dir === 'srcDir') {
+            if (dir === 'src_dir') {
                 throw new DirError(
                     `directory ${path.relative(cwd, dirPath)} does not exist.`,
                 );

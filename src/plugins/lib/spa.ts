@@ -17,7 +17,7 @@ export const spa: MinimalifyPlugin = {
     async onPostBuild(cfg) {
         logger.debug(`${this.name}-plugin: generating service-worker`);
 
-        const outDir = cfg.outDir;
+        const outDir = cfg.out_dir;
         // Gather all files to pre-cache
         const cacheFiles: string[] = [];
         const walk = (dir: string) => {

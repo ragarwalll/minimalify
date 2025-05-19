@@ -8,6 +8,7 @@ export const plugins = [
     'custom-domain',
     'markdown',
     'spa',
+    'favicon',
     'perf-monitor',
 ] as const;
 

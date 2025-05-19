@@ -42,7 +42,7 @@ export const isCssValidForProcessing = ({
 
     const value = hrefAttr.value;
     const isLocal = !/^https?:\/\//.test(value);
-    const isShared = cfg.sharedDomains.some((d) => value.startsWith(d));
+    const isShared = cfg.shared_domains.some((d) => value.startsWith(d));
 
     const isValid = (checkLocalUri && isLocal) || (checkRemoteUri && isShared);
 
@@ -69,7 +69,7 @@ export const isJsValidForProcessing = ({
 
     const value = srcAttr.value;
     const isLocal = !/^https?:\/\//.test(value);
-    const isShared = cfg.sharedDomains.some((d) => value.startsWith(d));
+    const isShared = cfg.shared_domains.some((d) => value.startsWith(d));
 
     const isValid = (checkLocalUri && isLocal) || (checkRemoteUri && isShared);
 
@@ -98,8 +98,8 @@ export const isImgValidForProcessing = ({
     const ext = path.extname(value).replace(/^\./, '').toLowerCase();
     const isLocal = !/^https?:\/\//.test(value);
     const isShared =
-        cfg.sharedDomains.some((d) => value.startsWith(d)) &&
-        (cfg.images?.supportedFormats ?? []).includes(ext);
+        cfg.shared_domains.some((d) => value.startsWith(d)) &&
+        (cfg.images?.supported_formats ?? []).includes(ext);
 
     const isValid = (checkLocalUri && isLocal) || (checkRemoteUri && isShared);
     return { isValid, value };
@@ -127,8 +127,8 @@ export const isObjectValidForProcessing = ({
     const ext = path.extname(value).replace(/^\./, '').toLowerCase();
     const isLocal = !/^https?:\/\//.test(value);
     const isShared =
-        cfg.sharedDomains.some((d) => value.startsWith(d)) &&
-        (cfg.images?.supportedFormats ?? []).includes(ext);
+        cfg.shared_domains.some((d) => value.startsWith(d)) &&
+        (cfg.images?.supported_formats ?? []).includes(ext);
 
     const isValid = (checkLocalUri && isLocal) || (checkRemoteUri && isShared);
     return { isValid, value };

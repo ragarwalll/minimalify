@@ -14,7 +14,7 @@ interface HTMLConfig {
  */
 interface JSConfig {
     minify: boolean;
-    minifyOptions: MinifyOptions;
+    minify_options: MinifyOptions;
     ignore: string[];
 }
 
@@ -32,13 +32,13 @@ interface CSSConfig {
 interface ImageConfig {
     optimize: boolean;
     outDir: string;
-    supportedFormats: string[];
+    supported_formats: string[];
     ignore: string[];
 }
 
 interface TemplatesConfig {
     dir: string;
-    sharedUri: string[];
+    shared_uri: string[];
     ignore: string[];
 }
 
@@ -53,7 +53,7 @@ interface TwitterConfig {
     site: string;
     card: string;
     image: string;
-    imageAlt: string;
+    image_alt: string;
 }
 
 interface RobotsConfig {
@@ -61,18 +61,18 @@ interface RobotsConfig {
     follow: boolean;
     allow: string[];
     disallow: string[];
-    crawlDelay: number;
-    userAgent: string[];
+    crawl_delay: number;
+    user_agent: string[];
 }
 
 interface AuthorConfig {
-    firstName: string;
-    lastName: string;
+    first_name: string;
+    last_name: string;
     username: string;
     email: string;
     image: string;
-    imageAlt: string;
-    imageType: string;
+    image_alt: string;
+    image_type: string;
     twitter: string;
     facebook: string;
     linkedin: string;
@@ -90,15 +90,24 @@ interface SeoConfig {
     rating: 'General' | 'Mature' | 'Restricted';
     target: 'all' | 'mobile' | 'desktop';
     author: Partial<AuthorConfig>;
-    opengraph: Partial<OpenGraphConfig>;
+    open_graph: Partial<OpenGraphConfig>;
     twitter: Partial<TwitterConfig>;
     robots: Partial<RobotsConfig>;
 }
 
 interface FaviconConfig {
-    svgPath: string;
-    themeColor: string;
-    msTileColor: string;
+    base: string;
+    alt: string;
+    settings: {
+        favicon_active: 'base' | 'alt';
+        favicon_inactive: 'base' | 'alt';
+        safari: 'base' | 'alt';
+        mstile: 'base' | 'alt';
+        pwa: 'base' | 'alt';
+        apple: 'base' | 'alt';
+    };
+    theme_color: string;
+    background_color: string;
 }
 
 /**
@@ -106,13 +115,13 @@ interface FaviconConfig {
  */
 export interface MinimalifyConfig {
     // the starting point of the project
-    srcDir: string;
+    src_dir: string;
 
     // the output directory of the project
-    outDir: string;
+    out_dir: string;
 
     // the processable assets domains
-    sharedDomains: string[];
+    shared_domains: string[];
 
     // html minifier options
     html: Partial<HTMLConfig>;
@@ -134,7 +143,7 @@ export interface MinimalifyConfig {
         port: number;
     };
 
-    customDomain?: string;
+    custom_domain?: string;
 
     seo?: Partial<SeoConfig>;
 
@@ -151,7 +160,7 @@ export interface MinimalifyConfig {
 // the available directories in the config
 export type AvailableDirectories = Pick<
     MinimalifyConfig,
-    'srcDir' | 'templates'
+    'src_dir' | 'templates'
 >;
 
 // the available directories in the config as array
@@ -162,9 +171,9 @@ export type AvailableDirectoriesArray = Array<keyof AvailableDirectories>;
  * @type {MinimalifyConfig}
  */
 export const defaultConfig: MinimalifyConfig = {
-    srcDir: '.',
-    outDir: 'dist',
-    sharedDomains: ['https://therahulagarwal.com'],
+    src_dir: '.',
+    out_dir: 'dist',
+    shared_domains: ['https://therahulagarwal.com'],
     html: {
         minify: true,
         ignore: [],
@@ -175,17 +184,17 @@ export const defaultConfig: MinimalifyConfig = {
     },
     js: {
         minify: true,
-        minifyOptions: {},
+        minify_options: {},
         ignore: [],
     },
     images: {
         optimize: true,
-        supportedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
+        supported_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
         ignore: [],
     },
     templates: {
         dir: 'templates',
-        sharedUri: [],
+        shared_uri: [],
         ignore: [],
     },
     seo: {
@@ -197,13 +206,13 @@ export const defaultConfig: MinimalifyConfig = {
         rating: 'General',
         target: 'all',
         author: {
-            firstName: 'Rahul',
-            lastName: 'Agarwal',
+            first_name: 'Rahul',
+            last_name: 'Agarwal',
             username: 'therahulagarwal',
             email: 'contact@thrahulagarwal.com',
             image: 'https://therahulagarwal.com/images/banner.jpg',
-            imageAlt: 'Rahul Agarwal',
-            imageType: 'image/jpeg',
+            image_alt: 'Rahul Agarwal',
+            image_type: 'image/jpeg',
             twitter: 'https://twitter.com/<username>',
             facebook: 'https://www.facebook.com/<username>',
             linkedin: 'https://www.linkedin.com/in/<username>',
@@ -211,7 +220,7 @@ export const defaultConfig: MinimalifyConfig = {
             instagram: 'https://www.instagram.com/<username>',
             youtube: 'https://www.youtube.com/<username>',
         },
-        opengraph: {
+        open_graph: {
             type: 'website',
             site_name: 'Minimalify',
         },
@@ -221,22 +230,31 @@ export const defaultConfig: MinimalifyConfig = {
             site: '@therahulagarwal',
             card: 'summary_large_image',
             image: 'https://minimalify.dev/assets/images/thumbnail.png',
-            imageAlt: 'Minimalify',
+            image_alt: 'Minimalify',
         },
         robots: {
             index: true,
             follow: true,
             allow: [],
             disallow: [],
-            crawlDelay: 0,
-            userAgent: ['*'],
+            crawl_delay: 0,
+            user_agent: ['*'],
         },
     },
-    customDomain: 'https://therahulagarwal.com',
+    custom_domain: 'https://therahulagarwal.com',
     favicon: {
-        svgPath: 'assets/images/favicon.svg',
-        themeColor: '#ffffff',
-        msTileColor: '#ffffff',
+        base: '<link-to-svg/png>',
+        alt: 'Minimalify',
+        settings: {
+            favicon_active: 'base',
+            favicon_inactive: 'alt',
+            safari: 'alt',
+            mstile: 'base',
+            pwa: 'base',
+            apple: 'alt',
+        },
+        theme_color: '#ffffff',
+        background_color: '#ffffff',
     },
     dev: {
         port: 3000,
