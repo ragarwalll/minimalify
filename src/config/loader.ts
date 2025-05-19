@@ -51,43 +51,12 @@ export const loadConfig = async (cwd: string, filePath: string) => {
 
     // merge the config with the default config
     if ('$schema' in config) delete config.$schema;
-    config = { ...defaultConfig, ...config };
 
     if (config.src_dir === undefined || config.src_dir === '')
         config.src_dir = '.';
 
     if (config.out_dir === undefined || config.out_dir === '')
         config.out_dir = 'dist';
-
-    // validate the directories in the config file
-    validateAvailableDir(cwd, config);
-
-    // validate with AJV
-    const ajv = new Ajv({ allErrors: true });
-    const validator = ajv.compile(MinimalifySchema);
-    if (!validator(config)) {
-        logger.spinner.stop();
-        logger.error(
-            `config file ${chalk.underline(path.relative(process.cwd(), filePath))} is invalid. please check the errors below.`,
-        );
-
-        const tableHeader = ['Property', 'Error'];
-        const tableRows = validator.errors?.map((error) => {
-            return {
-                Property: error.instancePath,
-                Error: error.message,
-            };
-        }) as { Property: string; Error: string }[];
-
-        logger.table(
-            tableHeader,
-            tableRows.map((row) => [row.Property, row.Error]),
-        );
-
-        throw new ValidationError(
-            `config file ${path.relative(process.cwd(), filePath)} is invalid. ${ajv.errorsText(validator.errors)}`,
-        );
-    }
 
     config.src_dir = path.join(cwd, config.src_dir);
     config.out_dir = path.join(cwd, config.out_dir);
@@ -108,6 +77,11 @@ export const loadConfig = async (cwd: string, filePath: string) => {
     if (config.images.ignore == undefined) config.images.ignore = [];
     if (config.templates.ignore == undefined) config.templates.ignore = [];
 
+    if (config.html.minify == undefined) config.html.minify = true;
+    if (config.js.minify == undefined) config.js.minify = true;
+    if (config.css.minify == undefined) config.css.minify = true;
+    if (config.images.optimize == undefined) config.images.optimize = true;
+
     if (config.templates.shared_uri === undefined)
         config.templates.shared_uri = [];
 
@@ -123,6 +97,13 @@ export const loadConfig = async (cwd: string, filePath: string) => {
     if (config.shared_domains === undefined) config.shared_domains = [];
     if (config.custom_domain === undefined) config.custom_domain = '';
     if (config.plugins === undefined) config.plugins = [];
+
+    if (
+        config.favicon &&
+        config.favicon.theme_color &&
+        !config.favicon.svg_current_color
+    )
+        config.favicon.svg_current_color = config.favicon.theme_color;
 
     if (
         config.js.minify_options === undefined ||
@@ -158,6 +139,36 @@ export const loadConfig = async (cwd: string, filePath: string) => {
         };
     }
 
+    // validate the directories in the config file
+    validateAvailableDir(cwd, config);
+
+    // validate with AJV
+    const ajv = new Ajv({ allErrors: true });
+    const validator = ajv.compile(MinimalifySchema);
+    if (!validator(config)) {
+        logger.spinner.stop();
+        logger.error(
+            `config file ${chalk.underline(path.relative(process.cwd(), filePath))} is invalid. please check the errors below.`,
+        );
+
+        const tableHeader = ['Property', 'Error'];
+        const tableRows = validator.errors?.map((error) => {
+            return {
+                Property: error.instancePath,
+                Error: error.message,
+            };
+        }) as { Property: string; Error: string }[];
+
+        logger.table(
+            tableHeader,
+            tableRows.map((row) => [row.Property, row.Error]),
+        );
+
+        throw new ValidationError(
+            `config file ${path.relative(process.cwd(), filePath)} is invalid. ${ajv.errorsText(validator.errors)}`,
+        );
+    }
+
     logger.debug(
         `using the src directory → ${chalk.bold.underline(config.src_dir)}`,
     );
@@ -178,7 +189,7 @@ const validateAvailableDir = (cwd: string, config: MinimalifyConfig): void => {
     });
 
     for (const dir of availableDirectories) {
-        const dirPath = path.join(cwd, config[dir]);
+        const dirPath = config[dir];
 
         // check if the directory exists
         if (!fs.existsSync(dirPath)) {

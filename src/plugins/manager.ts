@@ -53,6 +53,16 @@ export class MinimalifyPluginManager {
         logger.info(
             `loaded plugins → ${this.plugins.map((plugin) => plugin.name).join(', ')}`,
         );
+
+        // make sure if spa build is enabled, i.e. in this.plugins
+        // it is always the last plugin
+        const spaPlugin = this.plugins.find((plugin) => plugin.name === 'spa');
+        if (spaPlugin) {
+            this.plugins = this.plugins.filter(
+                (plugin) => plugin.name !== 'spa',
+            );
+            this.plugins.push(spaPlugin);
+        }
     }
 
     /**

@@ -2,7 +2,7 @@
  * Handles the favicon based on the visibility of the page.
  */
 const faviconHandler = () => {
-  const favicon = document.querySelector('link[rel="icon"][sizes="any"]');
+  const favicon = document.querySelector('link[rel="icon"][type="image/x-icon"]');
   if (!favicon) {
     console.warn('Favicon link element not found.');
     return;
@@ -13,8 +13,8 @@ const faviconHandler = () => {
   // Set the favicon path based on visibility
   // if the page is hidden, set a different favicon i.e. add a "hidden" suffix
   const faviconPath = document.hidden ?
-    currentFavicon.replace(/(\.[a-z]{2,4})$/, '-hidden$1') :
-    currentFavicon.replace(/-hidden(\.[a-z]{2,4})$/, '$1');
+    currentFavicon.replace(/(\.[a-z]{2,4})$/, '-inactive$1') :
+    currentFavicon.replace(/-inactive(\.[a-z]{2,4})$/, '$1');
     
   favicon.setAttribute('href', faviconPath);
 };

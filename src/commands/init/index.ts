@@ -38,7 +38,7 @@ export const init = async (
                   Object.assign(
                       {
                           $schema:
-                              'https://therahulagarwal.com/minimalify/schema/minimalify@latest.json',
+                              'https://therahulagarwal.com/minimalify/dist/schema/minimalify@latest.json',
                       },
                       cfg,
                   ),

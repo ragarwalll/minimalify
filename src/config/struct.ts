@@ -95,7 +95,7 @@ interface SeoConfig {
     robots: Partial<RobotsConfig>;
 }
 
-interface FaviconConfig {
+export interface FaviconConfig {
     base: string;
     alt: string;
     settings: {
@@ -108,6 +108,7 @@ interface FaviconConfig {
     };
     theme_color: string;
     background_color: string;
+    svg_current_color: string;
 }
 
 /**
@@ -202,16 +203,16 @@ export const defaultConfig: MinimalifyConfig = {
         description: 'A minimalistic static site generator',
         keywords: ['minimalify', 'static site generator', 'minimalistic'],
         classification: 'static site generator',
-        url: 'https://minimalify.dev',
+        url: 'https://therahulagarwal.com/minimalify',
         rating: 'General',
         target: 'all',
         author: {
-            first_name: 'Rahul',
-            last_name: 'Agarwal',
-            username: 'therahulagarwal',
+            first_name: '<first-name>',
+            last_name: '<last-name>',
+            username: '<username>',
             email: 'contact@thrahulagarwal.com',
-            image: 'https://therahulagarwal.com/images/banner.jpg',
-            image_alt: 'Rahul Agarwal',
+            image: '<link-to-image>',
+            image_alt: '<image alt>',
             image_type: 'image/jpeg',
             twitter: 'https://twitter.com/<username>',
             facebook: 'https://www.facebook.com/<username>',
@@ -227,10 +228,10 @@ export const defaultConfig: MinimalifyConfig = {
         twitter: {
             title: 'Minimalify',
             description: 'A minimalistic static site generator',
-            site: '@therahulagarwal',
+            site: '@<username>',
             card: 'summary_large_image',
-            image: 'https://minimalify.dev/assets/images/thumbnail.png',
-            image_alt: 'Minimalify',
+            image: '<link-to-image>',
+            image_alt: '<image alt>',
         },
         robots: {
             index: true,
@@ -241,10 +242,10 @@ export const defaultConfig: MinimalifyConfig = {
             user_agent: ['*'],
         },
     },
-    custom_domain: 'https://therahulagarwal.com',
+    custom_domain: '<link-to-custom-domain>',
     favicon: {
         base: '<link-to-svg/png>',
-        alt: 'Minimalify',
+        alt: '<link-to-svg/png>',
         settings: {
             favicon_active: 'base',
             favicon_inactive: 'alt',
@@ -271,5 +272,6 @@ export const defaultConfig: MinimalifyConfig = {
         'sitemap',
         'spa',
         'version-assets',
+        'favicon',
     ],
 };

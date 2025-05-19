@@ -27,7 +27,7 @@ export const spa: MinimalifyPlugin = {
                     walk(abs);
                 } else {
                     const rel = path.relative(outDir, abs).replace(/\\/g, '/');
-                    cacheFiles.push(`'/${rel}'`);
+                    cacheFiles.push(`'${rel}'`);
                 }
             }
         };
@@ -71,7 +71,7 @@ self.addEventListener('activate', event => {
         const registerSnippet = `
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js')
+  navigator.serviceWorker.register('sw.js')
     .then(reg=> console.log('SW registered', reg))
     .catch(err=> console.error('SW failed', err));
 }

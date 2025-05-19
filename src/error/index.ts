@@ -3,6 +3,7 @@ import { DirError } from './dir-error.js';
 import { FileError } from './file-error.js';
 import { GraphError } from './graph-error.js';
 import { HTMLError } from './html-error.js';
+import { ImageError } from './image-error.js';
 import { NotImplementedError } from './not-implemented-error.js';
 import { PluginError } from './plugin-error.js';
 import { ValidationError } from './validation-error.js';
@@ -17,6 +18,7 @@ const errorTypes = [
     PluginError,
     NotImplementedError,
     ValidationError,
+    ImageError,
 ];
 
 // Check if an error is an instance of any error type
@@ -36,6 +38,7 @@ function toKnownError(
     | PluginError
     | ValidationError
     | NotImplementedError
+    | ImageError
     | null {
     for (const ErrorType of errorTypes) {
         if (error instanceof ErrorType) {
@@ -47,7 +50,8 @@ function toKnownError(
                 | NotImplementedError
                 | HTMLError
                 | PluginError
-                | ValidationError;
+                | ValidationError
+                | ImageError;
         }
     }
     return null; // Return null if the error doesn't match any known type
