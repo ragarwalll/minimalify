@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import axios, { type AxiosRequestConfig } from 'axios';
+import Requestly, { type RequestlyRequestConfig } from '@/lib/requestly.js';
 import { ensureDir } from '@/utils/dir.js';
 import { logError, logger } from '@/utils/logger.js';
 import { CACHE_POST_DIR } from '@/utils/constants/cache.js';
@@ -134,7 +134,7 @@ export class HTTPCache {
      * @param config the axios request config
      * @returns the response
      */
-    protected _callUri(url: string, config: AxiosRequestConfig) {
-        return axios.get(url, config);
+    protected _callUri(url: string, config: RequestlyRequestConfig) {
+        return Requestly.get(url, config);
     }
 }
