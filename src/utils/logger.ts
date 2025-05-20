@@ -1,9 +1,11 @@
 import { terminalPretty } from '@/lib/terminal-pretty.js';
 import terminalSpinner, { type TerminalSpinner } from '@/lib/spinner.js';
-import { SingleBar, Presets } from 'cli-progress';
-// eslint-disable-next-line import/no-named-as-default
-import Table from 'cli-table3';
-import { codeFrameColumns } from '@babel/code-frame';
+import {
+    CustomSingleBar as SingleBar, // Alias to keep your code changes minimal
+    Presets,
+} from '@/lib/custom-cli-progress.js';
+import { CustomTable as Table } from '@/lib/custom-cli-table.js';
+import { customCodeFrameColumns as codeFrameColumns } from '@/lib/custom-code-frame.js';
 import { isKnownError, toKnownError } from '@/error/index.js';
 import stripAnsi from '@/lib/strip-ansi.js';
 
