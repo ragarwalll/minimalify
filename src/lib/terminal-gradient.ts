@@ -1,5 +1,5 @@
 /**
- * Minimal gradient-string clone.
+ * Minimal Terminal Gradient impl.
  */
 
 type RGB = { r: number; g: number; b: number };

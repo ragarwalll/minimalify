@@ -112,7 +112,6 @@
         "lru-cache": "^11.1.0",
         "markdown-it": "^14.1.0",
         "morphdom": "^2.7.5",
-        "ora": "^8.2.0",
         "parse5": "^7.3.0",
         "postcss": "^8.5.3",
         "purgecss": "^7.0.2",

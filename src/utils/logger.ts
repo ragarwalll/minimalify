@@ -1,5 +1,5 @@
 import { terminalPretty } from '@/lib/terminal-pretty.js';
-import ora, { type Ora } from 'ora';
+import terminalSpinner, { type TerminalSpinner } from '@/lib/spinner.js';
 import { SingleBar, Presets } from 'cli-progress';
 // eslint-disable-next-line import/no-named-as-default
 import Table from 'cli-table3';
@@ -213,7 +213,7 @@ export abstract class BaseLogger {
  * FancyLogger is a concrete implementation of BaseLogger that provides
  */
 export class FancyLogger extends BaseLogger {
-    private nativeSpinner: Ora | null = null;
+    private nativeSpinner: TerminalSpinner | null = null;
     private nativeProgress: SingleBar | null = null;
 
     constructor(opts: LoggerOptions) {
@@ -291,7 +291,7 @@ export class FancyLogger extends BaseLogger {
         // Real ora spinner
         this.spinner = {
             start: (text) => {
-                this.nativeSpinner = ora({ text }).start();
+                this.nativeSpinner = terminalSpinner({ text }).start();
             },
             update: (text) => {
                 if (this.nativeSpinner?.isSpinning) {
