@@ -2,7 +2,6 @@ import express, { static as expressStatic } from 'express';
 import fs from 'fs';
 import path from 'path';
 import { type FSWatcher, watch as chokidarWatch } from 'chokidar';
-import debounce from 'lodash.debounce';
 import { WebSocketServer } from 'ws';
 import { parseCfg } from '@/utils/config.js';
 import { logger } from '@/utils/logger.js';
@@ -11,6 +10,7 @@ import { type Server, type IncomingMessage, type ServerResponse } from 'http';
 import { Builder } from '../builder/build.js';
 import { type EmitterEventType } from '@/utils/types.js';
 import { terminalPretty } from '@/lib/terminal-pretty.js';
+import debounce from '@/lib/debounce.js';
 
 let server: Server<typeof IncomingMessage, typeof ServerResponse>;
 let wss: WebSocketServer;
