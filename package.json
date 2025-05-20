@@ -101,7 +101,6 @@
         "cli-table3": "^0.6.5",
         "commander": "^13.1.0",
         "cssnano": "^7.0.7",
-        "enquirer": "^2.4.1",
         "express": "^5.1.0",
         "fast-glob": "^3.3.3",
         "front-matter": "^4.0.2",
