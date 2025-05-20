@@ -1,8 +1,7 @@
-import gradient from 'gradient-string';
+import gradient from '@/lib/terminal-gradient.js';
 import { ASCII_PACKAGE_NAME } from '@/utils/constants/ascii-text.js';
 
-// colors inpired by SAP Evening Horizon theme
-const eveningHorizon = {
+const eveningTheme = {
     accent1: '#FFDF72',
     accent2: '#FF8CB2',
     accent3: '#FECBDA',
@@ -14,6 +13,6 @@ const eveningHorizon = {
  * Renders the package title in the console with a gradient effect.
  */
 export const renderPackageTitle = () => {
-    const colored = gradient(Object.values(eveningHorizon));
+    const colored = gradient(Object.values(eveningTheme));
     console.log(colored.multiline(ASCII_PACKAGE_NAME));
 };
