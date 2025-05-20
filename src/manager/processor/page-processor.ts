@@ -26,7 +26,7 @@ import {
 import { LRUCache } from 'lru-cache';
 import { fingerprint } from '@/utils/hasher.js';
 import { limit, parseAttrs } from '@/utils/other.js';
-import chalk from 'chalk';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 import { ensureDir } from '@/utils/dir.js';
 import {
     MATCH_CHILDREN_REGEX,
@@ -106,7 +106,9 @@ export class PageProcessor extends AssetProcessor {
         if (!this._cfg.html.minify) return bundle;
 
         // 1. Call the pre-bundle hook
-        logger.debug(`calling ${chalk.underline('pre-html-minify')} hook`);
+        logger.debug(
+            `calling ${terminalPretty.underline('pre-html-minify')} hook`,
+        );
         bundle =
             (await this._pluginManager.callHook(
                 'onPreHtmlMinify',
@@ -407,7 +409,7 @@ export class PageProcessor extends AssetProcessor {
             const m = MATCH_TEMPLATE_REGEX.exec(node.tagName);
             if (!m || !m[1]) {
                 logger.debug(
-                    `could not find template tag for → ${chalk.underline(node.tagName)}`,
+                    `could not find template tag for → ${terminalPretty.underline(node.tagName)}`,
                 );
                 return;
             }

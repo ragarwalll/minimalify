@@ -16,7 +16,7 @@ import { logger } from '@/utils/logger.js';
 import { limit } from '@/utils/other.js';
 import autoprefixer from 'autoprefixer';
 import postcss from 'postcss';
-import chalk from 'chalk';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 import { CSS_BUNDLE_NAME } from '@/utils/constants/bundle.js';
 import { type EmitterEventType } from '@/utils/types.js';
 
@@ -143,7 +143,7 @@ export class CSSProcessor extends AssetProcessor {
     }
 
     override async write(bundle: string) {
-        logger.debug(`calling ${chalk.underline('post-bundle')} hook`);
+        logger.debug(`calling ${terminalPretty.underline('post-bundle')} hook`);
         bundle =
             (await this._pluginManager.callHook(
                 'onPostBundle',
@@ -156,7 +156,7 @@ export class CSSProcessor extends AssetProcessor {
         ensureDir(outDir);
 
         logger.debug(
-            `writing bundle to disk → ${chalk.underline(path.relative(process.cwd(), outDir))}`,
+            `writing bundle to disk → ${terminalPretty.underline(path.relative(process.cwd(), outDir))}`,
         );
 
         fs.writeFileSync(path.join(outDir, CSS_BUNDLE_NAME), bundle, 'utf8');

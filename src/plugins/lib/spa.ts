@@ -3,7 +3,7 @@ import path from 'path';
 import fg from 'fast-glob';
 import { type MinimalifyPlugin } from '../typings.js';
 import { logger } from '@/utils/logger.js';
-import chalk from 'chalk';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 
 /**
  * spa plugin
@@ -65,7 +65,7 @@ self.addEventListener('activate', event => {
         // Write service worker file
         fs.writeFileSync(path.join(outDir, 'sw.js'), sw, 'utf8');
         logger.info(
-            `${this.name}-plugin: service-worker generated → ${chalk.underline(path.relative(process.cwd(), path.join(outDir, 'sw.js')))}`,
+            `${this.name}-plugin: service-worker generated → ${terminalPretty.underline(path.relative(process.cwd(), path.join(outDir, 'sw.js')))}`,
         );
 
         const registerSnippet = `

@@ -1,12 +1,12 @@
 import fs from 'fs';
 import path from 'path';
-import chalk from 'chalk';
 import { defaultConfig } from '@/config/struct.js';
 import {
     CONFIG_FILE_NAME,
     CONFIG_FILE_NAME_JSON,
 } from '@/utils/constants/file-name.js';
 import { logger } from '@/utils/logger.js';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 
 /**
  * Initialize the minimalify configuration file.
@@ -57,7 +57,7 @@ export const init = async (
     ) {
         if (!force) {
             logger.error(
-                `Config file ${chalk.underline(path.basename(type === 'js' ? CONFIG_FILE_NAME : CONFIG_FILE_NAME_JSON))} already exists. Use --force to overwrite it.`,
+                `Config file ${terminalPretty.underline(path.basename(type === 'js' ? CONFIG_FILE_NAME : CONFIG_FILE_NAME_JSON))} already exists. Use --force to overwrite it.`,
             );
             return;
         }
@@ -75,11 +75,11 @@ export const init = async (
 
     // inform the user
     logger.info(
-        `creating ${chalk.underline(type === 'js' ? CONFIG_FILE_NAME : CONFIG_FILE_NAME_JSON)} in ${cwd}`,
+        `creating ${terminalPretty.underline(type === 'js' ? CONFIG_FILE_NAME : CONFIG_FILE_NAME_JSON)} in ${cwd}`,
     );
 
     // insert new line
     logger.info(
-        `you can now start using minimalify by running ${chalk.bold.underline('minimalify build')}`,
+        `you can now start using minimalify by running ${terminalPretty.bold.underline('minimalify build')}`,
     );
 };

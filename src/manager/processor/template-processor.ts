@@ -14,7 +14,7 @@ import {
     MATCH_TEMPLATE_REGEX,
 } from '@/utils/constants/regex.js';
 import { walkHtmlTree } from '@/utils/html-walk.js';
-import chalk from 'chalk';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 import { preserveHtml } from '@/utils/html.js';
 import { appendPath, parseAttrs } from '@/utils/other.js';
 import { type EmitterEventType } from '@/utils/types.js';
@@ -193,7 +193,7 @@ export class TemplateProcessor extends AssetProcessor {
                             const m = MATCH_TEMPLATE_REGEX.exec(node.tagName);
                             if (!m || !m[1]) {
                                 logger.debug(
-                                    `could not find template tag for → ${chalk.underline(node.tagName)}`,
+                                    `could not find template tag for → ${terminalPretty.underline(node.tagName)}`,
                                 );
                                 return;
                             }

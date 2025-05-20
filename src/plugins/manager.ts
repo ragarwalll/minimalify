@@ -1,7 +1,7 @@
 import { type MinimalifyConfig } from '@/config/struct.js';
 import { type MinimalifyPlugin } from './typings.js';
 import { logError, logger } from '@/utils/logger.js';
-import chalk from 'chalk';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 import { plugins } from './lib/index.js';
 import { PluginError } from '@/error/plugin-error.js';
 
@@ -38,7 +38,7 @@ export class MinimalifyPluginManager {
 
                 this.plugins.push(loadedPlugin);
                 logger.spinner.update(
-                    `loaded plugin ${chalk.underline(plugin)}`,
+                    `loaded plugin ${terminalPretty.underline(plugin)}`,
                 );
             } catch (e) {
                 logError(e);

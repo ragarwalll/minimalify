@@ -4,7 +4,6 @@ import {
     PACKAGE_VERSION,
 } from '@/utils/constants/package-details.js';
 import { Command } from 'commander';
-import chalk from 'chalk';
 import { AFTER_ALL } from '@/utils/constants/cli/text.js';
 import {
     COMMAND_BUILD,
@@ -25,6 +24,7 @@ import { init } from '@/commands/init/index.js';
 import { Builder } from '@/commands/builder/build.js';
 import { parseCfg } from '@/utils/config.js';
 import { dev } from '@/commands/dev/index.js';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 
 const shutdown = () => {
     logger.spinner.stop();
@@ -51,9 +51,9 @@ export const initCommands = () => {
         // set after all text
         .addHelpText(
             'afterAll',
-            `\n ${AFTER_ALL.description[0]} ${chalk.bold(
+            `\n ${AFTER_ALL.description[0]} ${terminalPretty.bold(
                 `${AFTER_ALL.description[1]}`,
-            )} ${AFTER_ALL.description[2]} ${chalk.underline(
+            )} ${AFTER_ALL.description[2]} ${terminalPretty.underline(
                 `${AFTER_ALL.description[3]}`,
             )}`,
         )
@@ -249,13 +249,16 @@ const beforeCommand = ({
 const afterCommand = () => {
     console.log();
     console.log(
-        `For more information, visit ${chalk.blue.underline('https://therahulagarwal.com/minimalify')}`,
+        `For more information, visit ${terminalPretty.blue.underline('https://therahulagarwal.com/minimalify')}`,
     );
     console.log(
-        `Made with no ♥️  only boredom, ${chalk.bold('Happy Coding! 🚀')}`,
+        `Made with no ♥️  only boredom, ${terminalPretty.bold('Happy Coding! 🚀')}`,
     );
 };
 
 const handleError = (e: any) => {
-    logger.error(chalk.red('error occurred while executing command'), e);
+    logger.error(
+        terminalPretty.red('error occurred while executing command'),
+        e,
+    );
 };

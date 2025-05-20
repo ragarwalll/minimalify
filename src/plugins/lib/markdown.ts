@@ -5,7 +5,7 @@ import MarkdownIt from 'markdown-it';
 import { type MinimalifyPlugin } from '../typings.js';
 import { gatherMdFiles } from '@/utils/glob.js';
 import { logger } from '@/utils/logger.js';
-import chalk from 'chalk';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 
 /**
  * markdown plugin
@@ -77,7 +77,7 @@ ${htmlBody}
             fs.writeFileSync(dst, htmlPage, 'utf8');
 
             logger.debug(
-                `${this.name}-plugin: wrote HTML page → ${chalk.underline(
+                `${this.name}-plugin: wrote HTML page → ${terminalPretty.underline(
                     path.relative(process.cwd(), dst),
                 )}`,
             );

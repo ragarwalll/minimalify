@@ -5,7 +5,7 @@ import pLimit from 'p-limit';
 import sharp from 'sharp';
 import { type MinimalifyPlugin } from '../typings.js';
 import { logError, logger } from '@/utils/logger.js';
-import chalk from 'chalk';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 
 // Limit concurrent image optimizations to CPU cores
 const concurrency = os.cpus().length;
@@ -49,12 +49,12 @@ export const imageOptimizer: MinimalifyPlugin = {
                 fs.writeFileSync(dest, optimized);
             });
             logger.debug(
-                `${this.name}-plugin: optimized image → ${chalk.underline(path.relative(process.cwd(), dest))}`,
+                `${this.name}-plugin: optimized image → ${terminalPretty.underline(path.relative(process.cwd(), dest))}`,
             );
         } catch (err: any) {
             logError(err);
             logger.error(
-                `${this.name}-plugin: failed to optimize image → ${chalk.underline(path.relative(process.cwd(), dest))}`,
+                `${this.name}-plugin: failed to optimize image → ${terminalPretty.underline(path.relative(process.cwd(), dest))}`,
             );
         }
     },

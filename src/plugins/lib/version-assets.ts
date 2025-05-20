@@ -6,7 +6,7 @@ import fg from 'fast-glob';
 import { type MinimalifyPlugin } from '../typings.js';
 import { CSS_BUNDLE_NAME, JS_BUNDLE_NAME } from '@/utils/constants/bundle.js';
 import { logger } from '@/utils/logger.js';
-import chalk from 'chalk';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 
 export const versionAssets: MinimalifyPlugin = {
     name: 'version-assets',
@@ -49,7 +49,7 @@ export const versionAssets: MinimalifyPlugin = {
             'utf8',
         );
         logger.info(
-            `${this.name}-plugin: asset manifest written to → ${chalk.underline(path.relative(process.cwd(), manifestPath))}`,
+            `${this.name}-plugin: asset manifest written to → ${terminalPretty.underline(path.relative(process.cwd(), manifestPath))}`,
         );
 
         // Update HTML references

@@ -3,7 +3,7 @@ import path from 'path';
 import fg from 'fast-glob';
 import { type MinimalifyPlugin } from '../typings.js';
 import { logger } from '@/utils/logger.js';
-import chalk from 'chalk';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 
 /**
  * sitemap plugin
@@ -40,7 +40,7 @@ export const sitemap: MinimalifyPlugin = {
         fs.writeFileSync(dest, xml, 'utf8');
 
         logger.info(
-            `${this.name}-plugin: sitemap.xml generated → ${chalk.underline(path.relative(process.cwd(), dest))}`,
+            `${this.name}-plugin: sitemap.xml generated → ${terminalPretty.underline(path.relative(process.cwd(), dest))}`,
         );
     },
 };

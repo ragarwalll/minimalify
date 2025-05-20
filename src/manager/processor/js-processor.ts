@@ -13,7 +13,7 @@ import { limit } from '@/utils/other.js';
 import { minify } from 'terser';
 import { ensureDir } from '@/utils/dir.js';
 import path from 'path';
-import chalk from 'chalk';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 import { JS_BUNDLE_NAME } from '@/utils/constants/bundle.js';
 import { type EmitterEventType } from '@/utils/types.js';
 
@@ -128,7 +128,7 @@ export class JsProcessor extends AssetProcessor {
     }
 
     override async write(bundle: string) {
-        logger.debug(`calling ${chalk.underline('post-bundle')} hook`);
+        logger.debug(`calling ${terminalPretty.underline('post-bundle')} hook`);
         bundle =
             (await this._pluginManager.callHook(
                 'onPostBundle',
@@ -141,7 +141,7 @@ export class JsProcessor extends AssetProcessor {
         ensureDir(outDir);
 
         logger.debug(
-            `writing bundle to disk → ${chalk.underline(path.relative(process.cwd(), outDir))}`,
+            `writing bundle to disk → ${terminalPretty.underline(path.relative(process.cwd(), outDir))}`,
         );
 
         fs.writeFileSync(path.join(outDir, JS_BUNDLE_NAME), bundle, 'utf8');

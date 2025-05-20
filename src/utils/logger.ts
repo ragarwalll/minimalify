@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 import stripAnsi from 'strip-ansi';
 import ora, { type Ora } from 'ora';
 import { SingleBar, Presets } from 'cli-progress';
@@ -18,7 +18,7 @@ const LEVELS: Record<LogLevel, number> = {
     error: 40,
 };
 
-const LEVEL_COLORS: Record<LogLevel, keyof typeof chalk> = {
+const LEVEL_COLORS: Record<LogLevel, keyof typeof terminalPretty> = {
     debug: 'magenta',
     info: 'blue',
     success: 'green',
@@ -226,7 +226,7 @@ export class FancyLogger extends BaseLogger {
         const color = LEVEL_COLORS[level];
         const lvl = level.toUpperCase().padEnd(7);
         const indent = '  '.repeat(this.indent);
-        const line = `${indent}${(chalk as any)[color](lvl)} ${msg}`;
+        const line = `${indent}${(terminalPretty as any)[color](lvl)} ${msg}`;
 
         // If a spinner is active, clear → log → render
         if (this.nativeSpinner?.isSpinning) {
@@ -398,7 +398,7 @@ export class PlainLogger extends BaseLogger {
  * @returns { supportsColor: boolean, spinner: boolean, progress: boolean }
  */
 const detectCapabilities = () => {
-    const supportsColor = chalk.level > 0;
+    const supportsColor = terminalPretty.level > 0;
     const isTTY = process.stdout.isTTY;
     return {
         supportsColor,

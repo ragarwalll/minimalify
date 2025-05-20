@@ -7,7 +7,7 @@ import { MinimalifySchema } from './schema.js';
 import { ValidationError } from '@/error/validation-error.js';
 import { dynamicImport } from '@/utils/file.js';
 import { logger } from '@/utils/logger.js';
-import chalk from 'chalk';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 import {
     CONFIG_FILE_NAME,
     CONFIG_FILE_NAME_JSON,
@@ -26,7 +26,7 @@ export const loadConfig = async (cwd: string, filePath: string) => {
             filePath = CONFIG_FILE_NAME_JSON;
         } else {
             logger.warn(
-                `config file ${chalk.underline(path.relative(cwd, filePath))} does not exist. Using default config.`,
+                `config file ${terminalPretty.underline(path.relative(cwd, filePath))} does not exist. Using default config.`,
             );
             return defaultConfig;
         }
@@ -35,13 +35,13 @@ export const loadConfig = async (cwd: string, filePath: string) => {
     // check if the file exists
     if (!fs.existsSync(path.join(cwd, filePath))) {
         logger.warn(
-            `config file ${chalk.underline(path.relative(cwd, filePath))} does not exist. Using default config.`,
+            `config file ${terminalPretty.underline(path.relative(cwd, filePath))} does not exist. Using default config.`,
         );
         return defaultConfig;
     }
 
     logger.info(
-        `using the config file → ${chalk.bold.underline(path.relative(cwd, filePath))}`,
+        `using the config file → ${terminalPretty.bold.underline(path.relative(cwd, filePath))}`,
     );
 
     // load the config file with cwd as type MinimalifyConfig
@@ -148,7 +148,7 @@ export const loadConfig = async (cwd: string, filePath: string) => {
     if (!validator(config)) {
         logger.spinner.stop();
         logger.error(
-            `config file ${chalk.underline(path.relative(process.cwd(), filePath))} is invalid. please check the errors below.`,
+            `config file ${terminalPretty.underline(path.relative(process.cwd(), filePath))} is invalid. please check the errors below.`,
         );
 
         const tableHeader = ['Property', 'Error'];
@@ -170,10 +170,10 @@ export const loadConfig = async (cwd: string, filePath: string) => {
     }
 
     logger.debug(
-        `using the src directory → ${chalk.bold.underline(config.src_dir)}`,
+        `using the src directory → ${terminalPretty.bold.underline(config.src_dir)}`,
     );
     logger.debug(
-        `using the out directory → ${chalk.bold.underline(path.relative(cwd, config.out_dir))}`,
+        `using the out directory → ${terminalPretty.bold.underline(path.relative(cwd, config.out_dir))}`,
     );
     return config;
 };
@@ -200,7 +200,7 @@ const validateAvailableDir = (cwd: string, config: MinimalifyConfig): void => {
             } else {
                 // inform user using chalk
                 logger.warn(
-                    `directory ${chalk.underline(path.relative(cwd, dirPath))} does not exist.`,
+                    `directory ${terminalPretty.underline(path.relative(cwd, dirPath))} does not exist.`,
                 );
                 continue;
             }

@@ -3,7 +3,7 @@ import path from 'path';
 import { gzipSync } from 'zlib';
 import { type MinimalifyPlugin } from '../typings.js';
 import { logger } from '@/utils/logger.js';
-import chalk from 'chalk';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 
 /**
  * bundle-analyzer plugin
@@ -42,7 +42,7 @@ export const bundleAnalyzer: MinimalifyPlugin = {
             `${this.name}-plugin: gzipped size → ` + gzippedSize + ' bytes',
         );
         logger.info(
-            `${this.name}-plugin: report written to → ${chalk.underline(path.relative(process.cwd(), reportFile))}`,
+            `${this.name}-plugin: report written to → ${terminalPretty.underline(path.relative(process.cwd(), reportFile))}`,
         );
 
         // return content unmodified

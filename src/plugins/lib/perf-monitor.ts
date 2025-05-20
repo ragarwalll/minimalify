@@ -8,7 +8,7 @@ import {
     gatherJsFiles,
 } from '@/utils/glob.js';
 import { logger } from '@/utils/logger.js';
-import chalk from 'chalk';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 
 /**
  * perf-monitor plugin
@@ -54,7 +54,7 @@ export const perfMonitor: MinimalifyPlugin = {
         );
 
         logger.info(
-            `${this.name}-plugin: performance metrics written to → ${chalk.underline(path.relative(process.cwd(), path.join(outDir, 'perf-metrics.json')))}`,
+            `${this.name}-plugin: performance metrics written to → ${terminalPretty.underline(path.relative(process.cwd(), path.join(outDir, 'perf-metrics.json')))}`,
         );
     },
 };

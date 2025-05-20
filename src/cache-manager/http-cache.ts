@@ -10,8 +10,8 @@ import {
     HEADER_IF_NONE_MATCH,
     HEADER_LAST_MODIFIED,
 } from '@/utils/constants/headers.js';
-import chalk from 'chalk';
 import { type MinimalifyConfig } from '@/config/struct.js';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 
 /**
  * Cache metadata for HTTP responses.
@@ -46,7 +46,7 @@ export class HTTPCache {
             this.cacheDir = path.join(baseDir, CACHE_POST_DIR);
             ensureDir(this.cacheDir);
             logger.debug(
-                `using cache directory → ${chalk.underline(path.relative(process.cwd(), this.cacheDir))}`,
+                `using cache directory → ${terminalPretty.underline(path.relative(process.cwd(), this.cacheDir))}`,
             );
         } else {
             this.enabled = false;
@@ -93,7 +93,7 @@ export class HTTPCache {
                 // do nothing, just ignore the error
                 logError(e);
                 logger.warn(
-                    `failed to read cache metadata for → ${chalk.underline(url)}`,
+                    `failed to read cache metadata for → ${terminalPretty.underline(url)}`,
                 );
             }
         }

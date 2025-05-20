@@ -15,8 +15,8 @@ import { CACHE_DIR } from '@/utils/constants/cache.js';
 import { logger } from '@/utils/logger.js';
 import path from 'path';
 import { cleanDir, ensureDir } from '@/utils/dir.js';
-import chalk from 'chalk';
 import { type EmitterEventType } from '@/utils/types.js';
+import { terminalPretty } from '@/lib/terminal-pretty.js';
 
 /**
  * Builder class for building the project.
@@ -110,11 +110,11 @@ export class Builder {
         ensureDir(this.cfg.out_dir);
         cleanDir(this.cfg.out_dir);
 
-        logger.debug(`calling ${chalk.underline('pre-build')} hook`);
+        logger.debug(`calling ${terminalPretty.underline('pre-build')} hook`);
         await this.plugins.callHook('onPreBuild', this.cfg);
 
         logger.debug(
-            `cleaning output directory → ${chalk.underline(path.basename(this.cfg.out_dir))}`,
+            `cleaning output directory → ${terminalPretty.underline(path.basename(this.cfg.out_dir))}`,
         );
 
         // 2. Build the HTML pages
@@ -139,7 +139,7 @@ export class Builder {
         );
 
         logger.debug(
-            `html pages built → ${chalk.underline(pages.length.toString())}`,
+            `html pages built → ${terminalPretty.underline(pages.length.toString())}`,
         );
 
         // 3. Build the CSS, JS and IMG assets
@@ -163,13 +163,13 @@ export class Builder {
             );
         } else {
             logger.info(
-                `shared CSS assets found → ${chalk.underline(sharedCssUri.join(', '))}`,
+                `shared CSS assets found → ${terminalPretty.underline(sharedCssUri.join(', '))}`,
             );
             logger.info(
-                `shared JS assets found → ${chalk.underline(sharedJsUri.join(', '))}`,
+                `shared JS assets found → ${terminalPretty.underline(sharedJsUri.join(', '))}`,
             );
             logger.info(
-                `shared IMG assets found → ${chalk.underline(sharedImgUri.join(', '))}`,
+                `shared IMG assets found → ${terminalPretty.underline(sharedImgUri.join(', '))}`,
             );
         }
 
@@ -186,10 +186,10 @@ export class Builder {
         ]);
 
         logger.debug(
-            `html pages rendered → ${chalk.underline(pages.map((p) => path.basename(p)).join(', '))}`,
+            `html pages rendered → ${terminalPretty.underline(pages.map((p) => path.basename(p)).join(', '))}`,
         );
 
-        logger.debug(`calling ${chalk.underline('post-build')} hook`);
+        logger.debug(`calling ${terminalPretty.underline('post-build')} hook`);
         await this.plugins.callHook('onPostBuild', this.cfg);
     }
 
