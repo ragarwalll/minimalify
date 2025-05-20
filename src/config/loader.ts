@@ -198,7 +198,7 @@ const validateAvailableDir = (cwd: string, config: MinimalifyConfig): void => {
                     `directory ${path.relative(cwd, dirPath)} does not exist.`,
                 );
             } else {
-                // inform user using chalk
+                // inform user using
                 logger.warn(
                     `directory ${terminalPretty.underline(path.relative(cwd, dirPath))} does not exist.`,
                 );

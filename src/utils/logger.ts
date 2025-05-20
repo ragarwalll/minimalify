@@ -1,11 +1,11 @@
 import { terminalPretty } from '@/lib/terminal-pretty.js';
-import stripAnsi from 'strip-ansi';
 import ora, { type Ora } from 'ora';
 import { SingleBar, Presets } from 'cli-progress';
 // eslint-disable-next-line import/no-named-as-default
 import Table from 'cli-table3';
 import { codeFrameColumns } from '@babel/code-frame';
 import { isKnownError, toKnownError } from '@/error/index.js';
+import stripAnsi from '@/lib/strip-ansi.js';
 
 //Define the log levels
 export type LogLevel = 'debug' | 'info' | 'success' | 'warn' | 'error';
