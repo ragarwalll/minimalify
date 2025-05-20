@@ -1,0 +1,30 @@
+User-agent: *
+Allow: /
+Allow: /images/
+Allow: /favicon/
+Allow: /@*
+Allow: /schema
+
+# Sitemaps
+Sitemap: https://therahulagarwal.com/minimalify/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 10
+
+# Block access to certain directories
+Disallow: /private/
+Disallow: /admin/
+Disallow: /backup/
+Disallow: /temp/
+Disallow: /*.xml$
+Disallow: /*.txt$
+
+# Allow CSS, JavaScript, and Images
+Allow: /*.js$
+Allow: /*.css$
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.gif$
+Allow: /*.svg$
+Allow: /*.json$
+Allow: /*.ico$

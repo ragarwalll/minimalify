@@ -1,0 +1,108 @@
+/* reset.css */
+/*────────────────────────────────────────────────────────────────────────────
+  RESET
+────────────────────────────────────────────────────────────────────────────*/
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* base.css */
+/*────────────────────────────────────────────────────────────────────────────
+  1. CSS VARIABLES
+────────────────────────────────────────────────────────────────────────────*/
+:root {
+  /* COLORS */
+  --color-bg: #e8e8e3;
+  --color-text: #101010;
+
+  /* TYPOGRAPHY */
+  --font-size-base: 1rem; /* 16px */
+  --line-height-base: 1.4;
+  --font-family-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+
+  /* SPACING */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 2rem;
+  --space-xl: 4rem;
+
+  /* TRANSITION */
+  --transition-fast: 0.2s ease-in-out;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #101010;
+    --color-text: #b7ab98;
+  }
+}
+
+/*────────────────────────────────────────────────────────────────────────────
+  2. GLOBAL ELEMENT STYLES
+────────────────────────────────────────────────────────────────────────────*/
+html {
+  font-size: var(--font-size-base);
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--space-md);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+body {
+  font-family: var(--font-family-sans);
+  line-height: var(--line-height-base);
+  hyphens: auto;
+  max-width: 50rem;
+  margin: var(--space-xl) auto;
+  padding: var(--space-md);
+}
+
+/*────────────────────────────────────────────────────────────────────────────
+  3. TYPOGRAPHY UTILITIES (u-typography)
+────────────────────────────────────────────────────────────────────────────*/
+.u-text-light   { font-weight: 300 !important; }
+.u-text-regular { font-weight: 400 !important; }
+.u-text-bold    { font-weight: 700 !important; }
+.u-text-italic  { font-style: italic !important; }
+
+/*────────────────────────────────────────────────────────────────────────────
+  4. SPACING UTILITIES (u-spacing)
+────────────────────────────────────────────────────────────────────────────*/
+.u-mt-none { margin-top: 0 !important; }
+.u-mb-none { margin-bottom: 0 !important; }
+
+/*────────────────────────────────────────────────────────────────────────────
+  5. DISPLAY UTILITIES (u-layout)
+────────────────────────────────────────────────────────────────────────────*/
+.u-inline { display: inline !important; }
+.u-inline-block { display: inline-block !important; }
+
+/*────────────────────────────────────────────────────────────────────────────
+  6. LINK STYLES
+────────────────────────────────────────────────────────────────────────────*/
+a {
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.u-link-clean {
+  all: unset;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/*────────────────────────────────────────────────────────────────────────────
+  7. RESPONSIVE HELPERS
+────────────────────────────────────────────────────────────────────────────*/
+@media (max-width: 48em) {
+  body {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+}

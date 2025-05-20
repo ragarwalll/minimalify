@@ -1,0 +1,516 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "1.0.0",
+  "title": "MinimalifyConfig",
+  "description": "Configuration schema for Minimalify, supporting HTML, JS, CSS, images, templates, SEO, favicon, plugins, dev server, caching and custom domains.",
+  "type": "object",
+  "properties": {
+    "src_dir": {
+      "type": "string",
+      "description": "Source directory of the project.",
+      "default": ".",
+      "minLength": 1,
+      "examples": [
+        "src",
+        "."
+      ]
+    },
+    "out_dir": {
+      "type": "string",
+      "description": "Output directory for build artifacts.",
+      "default": "dist",
+      "minLength": 1,
+      "examples": [
+        "build",
+        "public"
+      ]
+    },
+    "shared_domains": {
+      "type": "array",
+      "description": "Domains from which to download dependent CSS/JS files.",
+      "items": {
+        "type": "string",
+        "pattern": "^https?://"
+      },
+      "default": [],
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "html": {
+      "$ref": "#/definitions/HTMLConfig"
+    },
+    "js": {
+      "$ref": "#/definitions/JSConfig"
+    },
+    "css": {
+      "$ref": "#/definitions/CSSConfig"
+    },
+    "images": {
+      "$ref": "#/definitions/ImageConfig"
+    },
+    "templates": {
+      "$ref": "#/definitions/TemplatesConfig"
+    },
+    "dev": {
+      "type": "object",
+      "description": "Development server settings.",
+      "properties": {
+        "port": {
+          "type": "integer",
+          "description": "Port number for the dev server.",
+          "default": 3000,
+          "minimum": 1,
+          "maximum": 65535,
+          "examples": [
+            3000,
+            8080
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "custom_domain": {
+      "type": "string",
+      "description": "Custom domain for generating CNAME records.",
+      "default": "",
+      "examples": [
+        "example.com",
+        ""
+      ]
+    },
+    "seo": {
+      "$ref": "#/definitions/SeoConfig"
+    },
+    "favicon": {
+      "$ref": "#/definitions/FaviconConfig"
+    },
+    "plugins": {
+      "type": "array",
+      "description": "List of Minimalify plugins to apply.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [
+        "bundle-analyzer",
+        "image-optimizer",
+        "accessibility",
+        "sitemap",
+        "version-assets",
+        "custom-domain",
+        "markdown",
+        "spa",
+        "perf-monitor"
+      ],
+      "uniqueItems": true
+    },
+    "cache": {
+      "type": "boolean",
+      "description": "Enable or disable caching.",
+      "default": true
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "HTMLConfig": {
+      "type": "object",
+      "properties": {
+        "minify": {
+          "type": "boolean",
+          "description": "Enable HTML minification.",
+          "default": true
+        },
+        "ignore": {
+          "type": "array",
+          "description": "HTML file paths to ignore (relative to src_dir).",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "JSConfig": {
+      "type": "object",
+      "properties": {
+        "minify": {
+          "type": "boolean",
+          "description": "Enable JS minification.",
+          "default": true
+        },
+        "minify_options": {
+          "type": "object",
+          "description": "Terser options for JS minification.",
+          "default": {}
+        },
+        "ignore": {
+          "type": "array",
+          "description": "JS file paths to ignore (relative to src_dir).",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "CSSConfig": {
+      "type": "object",
+      "properties": {
+        "minify": {
+          "type": "boolean",
+          "description": "Enable CSS minification.",
+          "default": true
+        },
+        "ignore": {
+          "type": "array",
+          "description": "CSS file paths to ignore (relative to src_dir).",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "ImageConfig": {
+      "type": "object",
+      "properties": {
+        "optimize": {
+          "type": "boolean",
+          "description": "Enable image optimization.",
+          "default": true
+        },
+        "supported_formats": {
+          "type": "array",
+          "description": "Supported image formats.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [
+            "jpg",
+            "jpeg",
+            "png",
+            "gif",
+            "webp",
+            "svg"
+          ],
+          "uniqueItems": true
+        },
+        "ignore": {
+          "type": "array",
+          "description": "Image file paths to ignore (relative to src_dir).",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "TemplatesConfig": {
+      "type": "object",
+      "properties": {
+        "dir": {
+          "type": "string",
+          "description": "Templates directory (relative to src_dir).",
+          "default": "templates",
+          "minLength": 1
+        },
+        "shared_uri": {
+          "type": "array",
+          "description": "External URIs for shared templates.",
+          "items": {
+            "type": "string",
+            "pattern": "^https?://.+"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "ignore": {
+          "type": "array",
+          "description": "Template file paths to ignore (relative to src_dir).",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "SeoConfig": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Page title for SEO.",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "Page description for SEO.",
+          "minLength": 1
+        },
+        "keywords": {
+          "type": "array",
+          "description": "SEO keywords.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "classification": {
+          "type": "string",
+          "description": "Page classification (e.g. portfolio, blog)."
+        },
+        "url": {
+          "type": "string",
+          "pattern": "^https?://.+",
+          "description": "Canonical URL of the page."
+        },
+        "rating": {
+          "type": "string",
+          "enum": [
+            "General",
+            "Mature",
+            "Restricted"
+          ],
+          "description": "Content rating."
+        },
+        "target": {
+          "type": "string",
+          "enum": [
+            "all",
+            "mobile",
+            "desktop"
+          ],
+          "description": "Target audience."
+        },
+        "author": {
+          "type": "object",
+          "description": "Author metadata.",
+          "properties": {
+            "first_name": {
+              "type": "string"
+            },
+            "last_name": {
+              "type": "string"
+            },
+            "username": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
+            },
+            "image": {
+              "type": "string",
+              "pattern": "^https?://.+"
+            },
+            "image_alt": {
+              "type": "string"
+            },
+            "image_type": {
+              "type": "string"
+            },
+            "twitter": {
+              "type": "string",
+              "pattern": "^https?://.+"
+            },
+            "facebook": {
+              "type": "string",
+              "pattern": "^https?://.+"
+            },
+            "linkedin": {
+              "type": "string",
+              "pattern": "^https?://.+"
+            },
+            "github": {
+              "type": "string",
+              "pattern": "^https?://.+"
+            },
+            "instagram": {
+              "type": "string",
+              "pattern": "^https?://.+"
+            },
+            "youtube": {
+              "type": "string",
+              "pattern": "^https?://.+"
+            }
+          },
+          "additionalProperties": false
+        },
+        "open_graph": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "OG object type (e.g. article)."
+            },
+            "site_name": {
+              "type": "string",
+              "description": "OG site name."
+            }
+          },
+          "additionalProperties": false
+        },
+        "twitter": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "site": {
+              "type": "string"
+            },
+            "card": {
+              "type": "string",
+              "enum": [
+                "summary",
+                "summary_large_image",
+                "app",
+                "player"
+              ]
+            },
+            "image": {
+              "type": "string",
+              "pattern": "^https?://.+"
+            },
+            "image_alt": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "robots": {
+          "type": "object",
+          "properties": {
+            "index": {
+              "type": "boolean"
+            },
+            "follow": {
+              "type": "boolean"
+            },
+            "allow": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "disallow": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "crawl_delay": {
+              "type": "number",
+              "minimum": 0
+            },
+            "user_agent": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [
+                "*"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "FaviconConfig": {
+      "type": "object",
+      "properties": {
+        "base": {
+          "type": "string",
+          "description": "Path to the base favicon image."
+        },
+        "alt": {
+          "type": "string",
+          "description": "Path to the alternative favicon image."
+        },
+        "settings": {
+          "type": "object",
+          "description": "Icon choice per context (base|alt).",
+          "properties": {
+            "favicon_active": {
+              "type": "string",
+              "enum": [
+                "base",
+                "alt"
+              ]
+            },
+            "favicon_inactive": {
+              "type": "string",
+              "enum": [
+                "base",
+                "alt"
+              ]
+            },
+            "safari": {
+              "type": "string",
+              "enum": [
+                "base",
+                "alt"
+              ]
+            },
+            "mstile": {
+              "type": "string",
+              "enum": [
+                "base",
+                "alt"
+              ]
+            },
+            "pwa": {
+              "type": "string",
+              "enum": [
+                "base",
+                "alt"
+              ]
+            },
+            "apple": {
+              "type": "string",
+              "enum": [
+                "base",
+                "alt"
+              ]
+            }
+          }
+        },
+        "theme_color": {
+          "type": "string",
+          "description": "Theme color for browser tab UI."
+        },
+        "background_color": {
+          "type": "string",
+          "description": "Background color for PWA splash screens and tiles."
+        },
+        "svg_current_color": {
+          "type": "string",
+          "description": "Use current color for SVG favicons."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

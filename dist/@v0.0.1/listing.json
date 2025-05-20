@@ -1,0 +1,14 @@
+[
+  {
+    "name": "css",
+    "isDirectory": true
+  },
+  {
+    "name": "js",
+    "isDirectory": true
+  },
+  {
+    "name": "templates",
+    "isDirectory": true
+  }
+]
