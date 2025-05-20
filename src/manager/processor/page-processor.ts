@@ -23,7 +23,7 @@ import {
     parseFragment,
     serialize,
 } from 'parse5';
-import { LRUCache } from 'lru-cache';
+import { LRUCache } from '@/lib/lru-cache.js';
 import { fingerprint } from '@/utils/hasher.js';
 import { limit, parseAttrs } from '@/utils/other.js';
 import { terminalPretty } from '@/lib/terminal-pretty.js';

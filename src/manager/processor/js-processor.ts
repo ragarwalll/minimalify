@@ -6,7 +6,7 @@ import {
     type AssetProcessorContext,
 } from './processor.js';
 import fs from 'fs';
-import { LRUCache } from 'lru-cache';
+import { LRUCache } from '@/lib/lru-cache.js';
 import { fingerprint } from '@/utils/hasher.js';
 import { logger } from '@/utils/logger.js';
 import { limit } from '@/utils/other.js';

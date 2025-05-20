@@ -9,7 +9,7 @@ import path from 'path';
 import fs from 'fs';
 import { ensureDir } from '@/utils/dir.js';
 import cssnano from 'cssnano';
-import { LRUCache } from 'lru-cache';
+import { LRUCache } from '@/lib/lru-cache.js';
 import { PurgeCSS } from 'purgecss';
 import { fingerprint } from '@/utils/hasher.js';
 import { logger } from '@/utils/logger.js';
