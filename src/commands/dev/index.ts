@@ -1,4 +1,4 @@
-import express, { static as expressStatic } from 'express';
+import express, { serveStatic as expressStatic } from '@/lib/express.js';
 import fs from 'fs';
 import path from 'path';
 import { type FSWatcher, watch as chokidarWatch } from 'chokidar';
