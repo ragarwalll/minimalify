@@ -1,6 +1,6 @@
 {
     "name": "minimalify",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Minimalify is a zero-dependency CLI/library for building blazing-fast, static HTML/CSS/JS sites",
     "license": "Apache-2.0",
     "publisher": "ragarwal06",
