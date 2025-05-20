@@ -1,7 +1,7 @@
 import path from 'path';
-import fs from 'fs-extra';
 import { type PackageJson } from 'type-fest';
 import { CLI_DIR } from '@/utils/constants/dir.js';
+import { readJSONSync } from '@/lib/fs-extra.js';
 
 export const getPackageJSON = () => {
     let packageManagerPath = path.join(CLI_DIR, 'package.json');
@@ -13,10 +13,7 @@ export const getPackageJSON = () => {
     // for mac
     packageManagerPath = packageManagerPath.replace('file:', '');
 
-    // eslint-disable-next-line import/no-named-as-default-member
-    const packageManagerContent = fs.readJSONSync(
-        packageManagerPath,
-    ) as PackageJson;
+    const packageManagerContent = readJSONSync<PackageJson>(packageManagerPath);
 
     return packageManagerContent;
 };
