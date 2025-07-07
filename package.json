@@ -113,6 +113,6 @@
         "xxhash-wasm": "^1.1.0"
     },
     "optionalDependencies": {
-        "@rollup/rollup-linux-x64-gnu": "4.41.0"
+        "@rollup/rollup-linux-x64-gnu": "4.44.2"
     }
 }
