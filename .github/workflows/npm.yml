@@ -24,7 +24,7 @@ jobs:
 
       # 2) Install & build
       - name: Use Node.js (from .nvmrc)
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
           cache: npm
